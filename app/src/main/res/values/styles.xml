@@ -6,6 +6,9 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="mfc_theme_background_color">@color/dialogBackgroundColor</item>
+        <item name="mfc_theme_foreground_color">@color/dialogForegroundColor</item>
+        <item name="mfc_theme_information_color">@color/dialogInformationColor</item>
     </style>
 
 </resources>

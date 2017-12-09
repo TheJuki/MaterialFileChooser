@@ -3,4 +3,7 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="dialogBackgroundColor">#FFF</color>
+    <color name="dialogForegroundColor">#533ab5</color>
+    <color name="dialogInformationColor">#AAA</color>
 </resources>

@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MaterialFileChooser</string>
+    <string name="quantidade_itens_pasta_singular">%d item</string>
+    <string name="quantidade_itens_pasta_plural">%d items</string>
+    <string name="quantidade_itens_selecionados_singular">%d selected item</string>
+    <string name="quantidade_itens_selecionados_plural">%d selected items</string>
 </resources>
