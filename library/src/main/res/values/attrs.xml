@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="mfc_theme_background_color" format="reference"/>
+    <attr name="mfc_theme_foreground_color" format="reference"/>
+    <attr name="mfc_theme_information_color" format="reference"/>
+</resources>
