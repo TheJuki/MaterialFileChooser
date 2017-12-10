@@ -7,24 +7,38 @@
               android:background="?attr/mfc_theme_background_color"
               android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/titulo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|left"
+        android:paddingBottom="10dp"
+        android:paddingLeft="24dp"
+        android:paddingTop="15dp"
+        android:text="Título"
+        android:textColor="?attr/mfc_theme_foreground_color"
+        android:textSize="20sp"/>
+
     <br.tiagohm.breadcrumbview.BreadCrumbView
         android:id="@+id/caminhoDoDiretorio"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:layout_alignParentTop="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
         android:background="#0000"
         app:bcv_separatorColor="?attr/mfc_theme_foreground_color"
         app:bcv_textColor="?attr/mfc_theme_foreground_color"/>
 
     <LinearLayout
+        android:id="@+id/barraMenuSuperior"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center">
 
         <ImageView
             android:id="@+id/botaoVoltar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
             android:layout_margin="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
@@ -84,8 +98,8 @@
 
         <ImageView
             android:id="@+id/botaoProsseguir"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
             android:layout_margin="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
@@ -96,15 +110,51 @@
 
         <ImageView
             android:id="@+id/irParaDiretorioInicial"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
             android:layout_margin="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:padding="4dp"
             android:src="@drawable/home"
             android:tint="?attr/mfc_theme_foreground_color"/>
+
+        <ImageView
+            android:id="@+id/botaoBuscar"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:layout_margin="10dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:padding="4dp"
+            android:src="@drawable/busca"
+            android:tint="?attr/mfc_theme_foreground_color"/>
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/campoDeBuscaBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="15dp"
+        android:visibility="gone">
+
+        <com.lapism.searchview.SearchView
+            android:id="@+id/campoDeBusca"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginLeft="-48dp"
+            android:gravity="center"
+            app:search_background_color="?attr/mfc_theme_background_color"
+            app:search_clear_on_open="true"
+            app:search_elevation="0dp"
+            app:search_hint="@android:string/search_go"
+            app:search_hint_color="?attr/mfc_theme_information_color"
+            app:search_icon_color="?attr/mfc_theme_foreground_color"
+            app:search_navigation_icon="@drawable/busca"
+            app:search_shadow="false"
+            app:search_text_color="?attr/mfc_theme_foreground_color"/>
+    </FrameLayout>
 
     <TextView
         android:id="@+id/quantidadeDeItensSelecionados"
