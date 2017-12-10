@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.CheckBox;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.lapism.searchview.SearchView;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -35,7 +37,6 @@ import br.tiagohm.easyadapter.EasyInjector;
 import br.tiagohm.easyadapter.Injector;
 
 //TODO Estensível para Dropbox, FTP, Drive, etc
-//TODO Implementar Busca
 //TODO Opção pra abrir o último diretório? Verificar se tem ultimo dir senão usar o initialFolder.
 //TODO Opção para selecionar tudo
 //TODO Botão de atualizar?
@@ -63,6 +64,9 @@ public class MaterialFileChooser {
     private ImageView mBotaoVoltar;
     private ImageView mIrParaDiretorioInicial;
     private TextView mQuantidadeDeItensSelecionados;
+    private ImageView mBotaoBuscar;
+    private View mCampoDeBuscaBox;
+    private SearchView mCampoDeBusca;
     //Variáveis
     private boolean showHiddenFiles;
     private boolean allowMultipleFiles;
@@ -81,6 +85,7 @@ public class MaterialFileChooser {
     private CheckBox arquivoAnteriormenteSelecionadoCb = null;
     private File arquivoAnteriormenteSelecionado = null;
     private OnFileChooserListener fileChooserListener;
+    private String busca = null;
 
     public MaterialFileChooser(@NonNull Context context) {
         this(context, null);
@@ -229,6 +234,29 @@ public class MaterialFileChooser {
             @Override
             public void onClick(View v) {
                 goToStart();
+            }
+        });
+        mBotaoBuscar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mCampoDeBuscaBox.getVisibility() == View.VISIBLE) {
+                    mCampoDeBuscaBox.setVisibility(View.GONE);
+                } else {
+                    mCampoDeBuscaBox.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+        mCampoDeBusca.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                busca = newText.toLowerCase();
+                loadCurrentFolder();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
             }
         });
     }
@@ -414,10 +442,12 @@ public class MaterialFileChooser {
         @Override
         public boolean accept(File f) {
             final boolean showHidden = showHiddenFiles || !f.isHidden();
-            return  //Exibir arquivos
-                    (showFiles && FileHelper.isFile(f) && showHidden) ||
-                            //Exibir pastas
-                            (showFolders && FileHelper.isFolder(f) && showHidden);
+            return  //Buscar
+                    (TextUtils.isEmpty(busca) || f.getName().toLowerCase().contains(busca)) &&
+                            //Exibir arquivos
+                            ((showFiles && FileHelper.isFile(f) && showHidden) ||
+                                    //Exibir pastas
+                                    (showFolders && FileHelper.isFolder(f) && showHidden));
             //TODO Adicionar Filtro (ExtensionFilter, RegexFilter, etc)
         }
     }
@@ -473,6 +503,9 @@ public class MaterialFileChooser {
             mBotaoVoltar = customView.findViewById(R.id.botaoVoltar);
             mIrParaDiretorioInicial = customView.findViewById(R.id.irParaDiretorioInicial);
             mQuantidadeDeItensSelecionados = customView.findViewById(R.id.quantidadeDeItensSelecionados);
+            mBotaoBuscar = customView.findViewById(R.id.botaoBuscar);
+            mCampoDeBusca = customView.findViewById(R.id.campoDeBusca);
+            mCampoDeBuscaBox = customView.findViewById(R.id.campoDeBuscaBox);
 
             //TODO Opção pra que seja necessário selecionar algum arquivo para sair.
             //Eventos.
