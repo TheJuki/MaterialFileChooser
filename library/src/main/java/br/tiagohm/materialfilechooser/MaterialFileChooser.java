@@ -4,6 +4,7 @@ package br.tiagohm.materialfilechooser;
 import android.content.Context;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
@@ -81,10 +82,25 @@ public class MaterialFileChooser {
     private File arquivoAnteriormenteSelecionado = null;
     private OnFileChooserListener fileChooserListener;
 
-    public MaterialFileChooser(final Context context) {
+    public MaterialFileChooser(@NonNull Context context) {
+        this(context, null);
+    }
+
+    public MaterialFileChooser(@NonNull Context context, String title) {
         this.context = context;
         //Builder.
-        builder = new Builder(context);
+        builder = new Builder(context, title);
+        init(context);
+    }
+
+    public MaterialFileChooser(@NonNull Context context, @StringRes int title) {
+        this.context = context;
+        //Builder.
+        builder = new Builder(context, title);
+        init(context);
+    }
+
+    private void init(@NonNull Context context) {
         //Adapter.
         listaDeArquivosEPastasAdapter.register(File.class, R.layout.file_item, new EasyInjector<File>() {
             @Override
@@ -170,10 +186,10 @@ public class MaterialFileChooser {
                         //Atualiza o número de pastas selecionadas de acordo com a pluralidade.
                         if (arquivosSelecionados.size() > 1) {
                             mQuantidadeDeItensSelecionados.setText(
-                                    context.getString(R.string.quantidade_itens_selecionados_plural, arquivosSelecionados.size()));
+                                    MaterialFileChooser.this.context.getString(R.string.quantidade_itens_selecionados_plural, arquivosSelecionados.size()));
                         } else {
                             mQuantidadeDeItensSelecionados.setText(
-                                    context.getString(R.string.quantidade_itens_selecionados_singular, arquivosSelecionados.size()));
+                                    MaterialFileChooser.this.context.getString(R.string.quantidade_itens_selecionados_singular, arquivosSelecionados.size()));
                         }
                     }
                 });
@@ -423,8 +439,29 @@ public class MaterialFileChooser {
     //Constrói o MaterialDialog.
     private class Builder extends MaterialDialog.Builder {
 
-        public Builder(@NonNull Context context) {
+        public Builder(@NonNull Context context, String title) {
             super(context);
+            init(context);
+            TextView mTitulo = customView.findViewById(R.id.titulo);
+            if (title != null) {
+                mTitulo.setText(title);
+            } else {
+                mTitulo.setVisibility(View.GONE);
+            }
+        }
+
+        public Builder(@NonNull Context context, @StringRes int title) {
+            super(context);
+            init(context);
+            TextView mTitulo = customView.findViewById(R.id.titulo);
+            if (title != 0) {
+                mTitulo.setText(title);
+            } else {
+                mTitulo.setVisibility(View.GONE);
+            }
+        }
+
+        private void init(@NonNull Context context) {
             customView(R.layout.dialog_file_chooser, false);
             positiveText(android.R.string.ok);
             negativeText(android.R.string.cancel);

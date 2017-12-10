@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements MaterialFileChoos
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     1234);
         } else {
-            new MaterialFileChooser(this).onFileChooserListener(this).show();
+            new MaterialFileChooser(this, "Selecione um arquivo").onFileChooserListener(this).show();
         }
 
 
@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements MaterialFileChoos
             case 1234: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    new MaterialFileChooser(this).show();
+                    new MaterialFileChooser(this, "Selecione um arquivo").show();
                 }
                 return;
             }

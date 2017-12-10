@@ -7,11 +7,25 @@
               android:background="?attr/mfc_theme_background_color"
               android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/titulo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|left"
+        android:paddingBottom="15dp"
+        android:paddingLeft="24dp"
+        android:paddingTop="15dp"
+        android:text="Título"
+        android:textColor="?attr/mfc_theme_foreground_color"
+        android:textSize="20sp"/>
+
     <br.tiagohm.breadcrumbview.BreadCrumbView
         android:id="@+id/caminhoDoDiretorio"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_alignParentTop="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
         android:background="#0000"
         app:bcv_separatorColor="?attr/mfc_theme_foreground_color"
         app:bcv_textColor="?attr/mfc_theme_foreground_color"/>
