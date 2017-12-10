@@ -290,13 +290,15 @@ public class MaterialFileChooser {
         if (!FileHelper.isFolder(file)) {
             file = file.getParentFile();
         }
-        //Obtém a pasta pai.
+        //Obtém a pasta-pai.
         final File parent = file.getParentFile();
         //Não tem pasta-pai.
         if (parent == null) {
             FileBreadCrumItem item = new RootFileBreadCrumItem(file);
             mCaminhoDoDiretorio.addItem(item);
-        } else {
+        }
+        //Tem pasta-pai.
+        else {
             populateBreadCrumbView(parent);
             FileBreadCrumItem item = new FileBreadCrumItem(file);
             mCaminhoDoDiretorio.addItem(item);
@@ -322,10 +324,12 @@ public class MaterialFileChooser {
     //Compara dois arquivos.
     private int compareFile(File a, File b) {
         if (showFoldersFirst) {
-            return a.isDirectory() == b.isDirectory() ? a.getName().compareToIgnoreCase(b.getName()) :
+            return a.isDirectory() == b.isDirectory() ?
+                    a.getName().compareToIgnoreCase(b.getName()) :
                     a.isDirectory() ? -1 : 1;
         } else {
-            return a.isFile() == b.isFile() ? a.getName().compareToIgnoreCase(b.getName()) :
+            return a.isFile() == b.isFile() ?
+                    a.getName().compareToIgnoreCase(b.getName()) :
                     a.isFile() ? -1 : 1;
         }
     }
@@ -394,31 +398,13 @@ public class MaterialFileChooser {
     //Item para uma pasta.
     private static class FileBreadCrumItem extends BreadCrumbItem<File> {
 
-        private BreadCrumbItem.Builder<File> builder = new Builder<>();
-        private BreadCrumbItem<File> item;
-
         public FileBreadCrumItem(File file) {
-            item = builder.itens(file).build();
+            setItens(Collections.singletonList(file));
         }
 
         @Override
         public String getText() {
             return getSelectedItem().getName();
-        }
-
-        @Override
-        public File getSelectedItem() {
-            return item.getSelectedItem();
-        }
-
-        @Override
-        public int getSelectedIndex() {
-            return item.getSelectedIndex();
-        }
-
-        @Override
-        public List<File> getItens() {
-            return item.getItens();
         }
     }
 
