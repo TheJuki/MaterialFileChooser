@@ -50,6 +50,8 @@ public class MaterialFileChooser {
     public interface OnFileChooserListener {
 
         void onItemSelected(List<File> files);
+
+        void onCancelled();
     }
 
     //Variáveis finais.
@@ -557,6 +559,15 @@ public class MaterialFileChooser {
                         files.addAll(arquivosSelecionados);
                         //Dispara o evento passando a lista.
                         fileChooserListener.onItemSelected(Collections.unmodifiableList(files));
+                    }
+                }
+            });
+            onNegative(new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                    if (fileChooserListener != null) {
+                        //Dispara o evento.
+                        fileChooserListener.onCancelled();
                     }
                 }
             });

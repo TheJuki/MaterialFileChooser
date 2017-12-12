@@ -8,14 +8,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.List;
 
 import br.tiagohm.materialfilechooser.MaterialFileChooser;
 import br.tiagohm.materialfilechooser.Sorter;
-import br.tiagohm.materialfilechooser.filters.ExtensionFilter;
-import br.tiagohm.materialfilechooser.filters.RegexFilter;
 
 public class MainActivity extends AppCompatActivity implements MaterialFileChooser.OnFileChooserListener {
 
@@ -53,6 +52,11 @@ public class MainActivity extends AppCompatActivity implements MaterialFileChoos
     @Override
     public void onItemSelected(List<File> files) {
         Log.d("TAG", files.toString());
+    }
+
+    @Override
+    public void onCancelled() {
+        Toast.makeText(this, "A janela foi cancelada", Toast.LENGTH_SHORT).show();
     }
 
     private void showMaterialFileChooser() {
