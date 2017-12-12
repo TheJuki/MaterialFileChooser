@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -67,6 +68,7 @@ public class MaterialFileChooser {
     private ImageView mBotaoBuscar;
     private View mCampoDeBuscaBox;
     private SearchView mCampoDeBusca;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     //Variáveis
     private boolean showHiddenFiles;
     private boolean allowMultipleFiles;
@@ -198,6 +200,14 @@ public class MaterialFileChooser {
                             mQuantidadeDeItensSelecionados.setText(
                                     MaterialFileChooser.this.context.getString(R.string.quantidade_itens_selecionados_singular, arquivosSelecionados.size()));
                         }
+                    }
+                });
+                //Atualizar
+                mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        loadCurrentFolder();
+                        mSwipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
@@ -508,15 +518,16 @@ public class MaterialFileChooser {
             positiveText(android.R.string.ok);
             negativeText(android.R.string.cancel);
             //Views.
-            TypedValue value = new TypedValue();
+            TypedValue backgroundValue = new TypedValue();
             android.content.res.Resources.Theme theme = context.getTheme();
             //Cor de fundo do tema.
-            theme.resolveAttribute(R.attr.mfc_theme_background_color, value, true);
-            backgroundColor(value.data);
+            theme.resolveAttribute(R.attr.mfc_theme_background_color, backgroundValue, true);
+            backgroundColor(backgroundValue.data);
             //Cor de frente do tema.
-            theme.resolveAttribute(R.attr.mfc_theme_foreground_color, value, true);
-            positiveColor(value.data);
-            negativeColor(value.data);
+            TypedValue foregroundValue = new TypedValue();
+            theme.resolveAttribute(R.attr.mfc_theme_foreground_color, foregroundValue, true);
+            positiveColor(foregroundValue.data);
+            negativeColor(foregroundValue.data);
             cancelable(false);
             canceledOnTouchOutside(false);
 
@@ -532,6 +543,8 @@ public class MaterialFileChooser {
             mBotaoBuscar = customView.findViewById(R.id.botaoBuscar);
             mCampoDeBusca = customView.findViewById(R.id.campoDeBusca);
             mCampoDeBuscaBox = customView.findViewById(R.id.campoDeBuscaBox);
+            mSwipeRefreshLayout = customView.findViewById(R.id.swipeRefreshLayout);
+            mSwipeRefreshLayout.setColorSchemeColors(foregroundValue.data);
 
             //TODO Opção pra que seja necessário selecionar algum arquivo para sair.
             //Eventos.
