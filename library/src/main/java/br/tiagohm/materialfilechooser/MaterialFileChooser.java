@@ -86,6 +86,7 @@ public class MaterialFileChooser {
     private File arquivoAnteriormenteSelecionado = null;
     private OnFileChooserListener fileChooserListener;
     private String busca = null;
+    private List<Filter> filters = new ArrayList<>();
 
     public MaterialFileChooser(@NonNull Context context) {
         this(context, null);
@@ -311,6 +312,16 @@ public class MaterialFileChooser {
         return this;
     }
 
+    public MaterialFileChooser addFilter(Filter filter) {
+        filters.add(filter);
+        return this;
+    }
+
+    public MaterialFileChooser removeFilter(Filter filter) {
+        filters.remove(filter);
+        return this;
+    }
+
     private void populateBreadCrumbView(File file) {
         //Limpa
         mCaminhoDoDiretorio.getItens().clear();
@@ -447,8 +458,18 @@ public class MaterialFileChooser {
                             //Exibir arquivos
                             ((showFiles && FileHelper.isFile(f) && showHidden) ||
                                     //Exibir pastas
-                                    (showFolders && FileHelper.isFolder(f) && showHidden));
-            //TODO Adicionar Filtro (ExtensionFilter, RegexFilter, etc)
+                                    (showFolders && FileHelper.isFolder(f) && showHidden)) &&
+                            //Filtros
+                            filter(f);
+        }
+
+        private boolean filter(File f) {
+            for (Filter filter : filters) {
+                if (filter.accept(f)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
