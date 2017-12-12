@@ -13,6 +13,7 @@ import java.io.File;
 import java.util.List;
 
 import br.tiagohm.materialfilechooser.MaterialFileChooser;
+import br.tiagohm.materialfilechooser.Sorter;
 import br.tiagohm.materialfilechooser.filters.ExtensionFilter;
 import br.tiagohm.materialfilechooser.filters.RegexFilter;
 
@@ -66,10 +67,11 @@ public class MainActivity extends AppCompatActivity implements MaterialFileChoos
                 //.initialFolder(Environment.getExternalStorageDirectory())
                 .onFileChooserListener(this)
                 //OR Logic
-                //.addFilter(new ExtensionFilter("jpg"))
-                //.addFilter(new ExtensionFilter("png"))
+                //.filter(new ExtensionFilter("jpg"))
+                //.filter(new ExtensionFilter("png"))
                 //AND Logic
-                .addFilter(new ExtensionFilter(new RegexFilter(".*WA.*"), "jpg"))
+                //.filter(new ExtensionFilter(new RegexFilter(".*WA.*"), "jpg"))
+                .sorter(Sorter.SORT_BY_NEWEST_MODIFICATION)
                 .show();
     }
 }

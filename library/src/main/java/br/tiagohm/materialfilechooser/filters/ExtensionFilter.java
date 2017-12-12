@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import br.tiagohm.materialfilechooser.FileHelper;
 import br.tiagohm.materialfilechooser.Filter;
 
 public class ExtensionFilter extends Filter {
@@ -29,28 +30,13 @@ public class ExtensionFilter extends Filter {
         this.extensions = extensions;
     }
 
-    private static String getExtension(final String filename) {
-        final int index = indexOfExtension(filename);
-        return index == -1 ? "" : filename.substring(index + 1);
-    }
-
-    private static int indexOfExtension(final String filename) {
-        final int extensionPos = filename.lastIndexOf('.');
-        final int lastSeparator = indexOfLastSeparator(filename);
-        return lastSeparator > extensionPos ? -1 : extensionPos;
-    }
-
-    private static int indexOfLastSeparator(final String filename) {
-        return filename.lastIndexOf('/');
-    }
-
     @Override
     public boolean accept(File file) {
         if (file.isDirectory()) {
             return super.accept(file);
         }
 
-        final String ext = getExtension(file.getName()).toLowerCase();
+        final String ext = FileHelper.getExtension(file.getName()).toLowerCase();
         for (String extension : extensions) {
             if (ext.equals(extension)) {
                 return super.accept(file);

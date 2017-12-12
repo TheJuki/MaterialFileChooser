@@ -87,6 +87,7 @@ public class MaterialFileChooser {
     private OnFileChooserListener fileChooserListener;
     private String busca = null;
     private List<Filter> filters = new ArrayList<>();
+    private Sorter ordenacao = Sorter.SORT_BY_NAME_ASC;
 
     public MaterialFileChooser(@NonNull Context context) {
         this(context, null);
@@ -312,13 +313,14 @@ public class MaterialFileChooser {
         return this;
     }
 
-    public MaterialFileChooser addFilter(Filter filter) {
+    public MaterialFileChooser filter(Filter filter) {
         filters.add(filter);
         return this;
     }
 
-    public MaterialFileChooser removeFilter(Filter filter) {
-        filters.remove(filter);
+    public MaterialFileChooser sorter(Sorter sorter) {
+        if (sorter == null) sorter = Sorter.SORT_BY_NAME_ASC;
+        this.ordenacao = sorter;
         return this;
     }
 
@@ -364,11 +366,11 @@ public class MaterialFileChooser {
     private int compareFile(File a, File b) {
         if (showFoldersFirst) {
             return a.isDirectory() == b.isDirectory() ?
-                    a.getName().compareToIgnoreCase(b.getName()) :
+                    ordenacao.compare(a, b) :
                     a.isDirectory() ? -1 : 1;
         } else {
             return a.isFile() == b.isFile() ?
-                    a.getName().compareToIgnoreCase(b.getName()) :
+                    ordenacao.compare(a, b) :
                     a.isFile() ? -1 : 1;
         }
     }
@@ -464,6 +466,9 @@ public class MaterialFileChooser {
         }
 
         private boolean filter(File f) {
+            //Não há filtros.
+            if (filters.size() == 0) return true;
+            //Filtra.
             for (Filter filter : filters) {
                 if (filter.accept(f)) {
                     return true;
