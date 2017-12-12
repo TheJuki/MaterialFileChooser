@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-class FileHelper {
+public class FileHelper {
 
     private static final PrettyTime PRETTY_TIME = new PrettyTime();
 
@@ -96,4 +96,21 @@ class FileHelper {
             return fileList;
         }
     }
+
+    public static String getExtension(final String filename) {
+        final int index = indexOfExtension(filename);
+        return index == -1 ? "" : filename.substring(index + 1);
+    }
+
+    public static int indexOfExtension(final String filename) {
+        final int extensionPos = filename.lastIndexOf('.');
+        final int lastSeparator = indexOfLastSeparator(filename);
+        return lastSeparator > extensionPos ? -1 : extensionPos;
+    }
+
+    public static int indexOfLastSeparator(final String filename) {
+        return filename.lastIndexOf('/');
+    }
+
+
 }

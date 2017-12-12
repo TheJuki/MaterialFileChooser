@@ -166,9 +166,15 @@
         android:text="3 itens selecionados"
         android:textColor="?attr/mfc_theme_foreground_color"/>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/listaDeArquivosEPastas"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:minHeight="200dp"/>
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/listaDeArquivosEPastas"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:minHeight="200dp"/>
+    </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>
