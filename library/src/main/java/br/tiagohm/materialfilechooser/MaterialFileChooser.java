@@ -2,6 +2,7 @@ package br.tiagohm.materialfilechooser;
 
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
@@ -39,7 +40,6 @@ import br.tiagohm.easyadapter.EasyInjector;
 import br.tiagohm.easyadapter.Injector;
 
 //TODO Estensível para Dropbox, FTP, Drive, etc
-//TODO Opção pra abrir o último diretório? Verificar se tem ultimo dir senão usar o initialFolder.
 //TODO Botão de atualizar?
 //TODO Botão pra ver outras informações
 //TODO Icone com marcador de protegido/somente leitura, etc
@@ -82,6 +82,7 @@ public class MaterialFileChooser {
     private boolean showFoldersFirst;
     private boolean showFiles;
     private boolean showFolders;
+    private boolean restoreFolder;
     private File initialFolder;
     private File pastaAtual;
     private LinkedList<File> pilhaDeCaminhos = new LinkedList<>();
@@ -95,6 +96,7 @@ public class MaterialFileChooser {
     private List<Filter> filters = new ArrayList<>();
     private Sorter ordenacao = Sorter.SORT_BY_NAME_ASC;
     private Map<File, Boolean> selecionarTudoStatus = new ConcurrentHashMap<>();
+    private PrefsManager prefsManager;
 
     public MaterialFileChooser(@NonNull Context context) {
         this(context, null);
@@ -115,6 +117,8 @@ public class MaterialFileChooser {
     }
 
     private void init(@NonNull Context context) {
+        //Preferencias.
+        prefsManager = new PrefsManager(context);
         //Adapter.
         listaDeArquivosEPastasAdapter.register(File.class, R.layout.file_item, new EasyInjector<File>() {
             @Override
@@ -209,6 +213,7 @@ public class MaterialFileChooser {
         allowBrowsing(true);
         showFiles(true);
         showFolders(true);
+        restoreFolder(false);
         //Quantidade de itens inicial.
         exibirQuantidadeDeItensSelecionados();
         //Adiciona os eventos
@@ -344,6 +349,11 @@ public class MaterialFileChooser {
         return this;
     }
 
+    public MaterialFileChooser restoreFolder(boolean restoreFolder) {
+        this.restoreFolder = restoreFolder;
+        return this;
+    }
+
     public MaterialFileChooser initialFolder(File initialFolder) {
         this.initialFolder = initialFolder;
         this.pastaAtual = initialFolder;
@@ -351,6 +361,8 @@ public class MaterialFileChooser {
         pilhaDeCaminhos.clear();
         //Insere na pilha.
         pilhaDeCaminhos.addFirst(pastaAtual);
+        //Estado desta pasta.
+        selecionarTudoStatus.put(pastaAtual, false);
         return this;
     }
 
@@ -446,8 +458,11 @@ public class MaterialFileChooser {
     }
 
     public boolean back() {
+        //Se pode navegar e há pasta pra navegar.
         if (allowBrowsing && pilhaDeCaminhos.size() > 1) {
+            //Remove a pasta atual da pilha.
             pilhaDeCaminhos.removeFirst();
+            //Retorna para a pasta anterior.
             return backTo(pilhaDeCaminhos.getFirst());
         } else {
             return false;
@@ -470,12 +485,30 @@ public class MaterialFileChooser {
         }
     }
 
+    public boolean goToPreviouslySelectedFolder() {
+        //Busca uma pasta anteriormente selecionada.
+        File folder = prefsManager.getPreviouslySelectedDiretory();
+        //Há uma pasta.
+        if (folder != null) {
+            //Vá para esta pasta.
+            goTo(folder);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void goToStart() {
         goTo(initialFolder);
     }
 
     public void show() {
-        goTo(initialFolder);
+        //Não é pra restaurar e não há pasta pra restaurar.
+        if (!restoreFolder || !goToPreviouslySelectedFolder()) {
+            //Abrir direto na pasta inicial.
+            goTo(initialFolder);
+        }
+        //Exibe o dialog.
         dialog = builder.show();
     }
 
@@ -614,6 +647,12 @@ public class MaterialFileChooser {
                         //Dispara o evento.
                         fileChooserListener.onCancelled();
                     }
+                }
+            });
+            dismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    prefsManager.setPreviouslySelectedDiretory(pastaAtual);
                 }
             });
         }
