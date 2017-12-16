@@ -2,6 +2,7 @@ package br.tiagohm.materialfilechooser;
 
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
@@ -25,11 +26,12 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import br.tiagohm.breadcrumbview.BreadCrumbItem;
 import br.tiagohm.breadcrumbview.BreadCrumbView;
@@ -38,8 +40,6 @@ import br.tiagohm.easyadapter.EasyInjector;
 import br.tiagohm.easyadapter.Injector;
 
 //TODO Estensível para Dropbox, FTP, Drive, etc
-//TODO Opção pra abrir o último diretório? Verificar se tem ultimo dir senão usar o initialFolder.
-//TODO Opção para selecionar tudo
 //TODO Botão de atualizar?
 //TODO Botão pra ver outras informações
 //TODO Icone com marcador de protegido/somente leitura, etc
@@ -71,20 +71,23 @@ public class MaterialFileChooser {
     private View mCampoDeBuscaBox;
     private SearchView mCampoDeBusca;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private CheckBox mSelecionarTudo;
     //Variáveis
     private boolean showHiddenFiles;
     private boolean allowMultipleFiles;
+    private boolean allowBrowsing;
     //TODO Permitir a criação de diretório.
     private boolean allowCreateFolder;
     private boolean allowSelectFolder;
     private boolean showFoldersFirst;
     private boolean showFiles;
     private boolean showFolders;
+    private boolean restoreFolder;
     private File initialFolder;
     private File pastaAtual;
     private LinkedList<File> pilhaDeCaminhos = new LinkedList<>();
     private List<File> arquivosAtuais;
-    private Set<File> arquivosSelecionados = new HashSet<>();
+    private Set<File> arquivosSelecionados = Collections.newSetFromMap(new ConcurrentHashMap<File, Boolean>());
     private ChooserFileFilter chooserFileFilter = new ChooserFileFilter();
     private CheckBox arquivoAnteriormenteSelecionadoCb = null;
     private File arquivoAnteriormenteSelecionado = null;
@@ -92,6 +95,8 @@ public class MaterialFileChooser {
     private String busca = null;
     private List<Filter> filters = new ArrayList<>();
     private Sorter ordenacao = Sorter.SORT_BY_NAME_ASC;
+    private Map<File, Boolean> selecionarTudoStatus = new ConcurrentHashMap<>();
+    private PrefsManager prefsManager;
 
     public MaterialFileChooser(@NonNull Context context) {
         this(context, null);
@@ -112,6 +117,8 @@ public class MaterialFileChooser {
     }
 
     private void init(@NonNull Context context) {
+        //Preferencias.
+        prefsManager = new PrefsManager(context);
         //Adapter.
         listaDeArquivosEPastasAdapter.register(File.class, R.layout.file_item, new EasyInjector<File>() {
             @Override
@@ -167,41 +174,8 @@ public class MaterialFileChooser {
                 checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        //Checkbox selecionado.
-                        if (isChecked) {
-                            //Não é multi-selecionável e tem um arquivo selecionado já.
-                            if (!allowMultipleFiles && arquivoAnteriormenteSelecionadoCb != null) {
-                                CheckBox cb = arquivoAnteriormenteSelecionadoCb;
-                                arquivoAnteriormenteSelecionadoCb = null;
-                                //Dois arquivos que estão na mesma pasta.
-                                if (buttonView != cb &&
-                                        Objects.equals(file.getParent(), arquivoAnteriormenteSelecionado.getParent())) {
-                                    //Desmarca o que está selecionado.
-                                    cb.setChecked(false);
-                                } else {
-                                    //Remove o que está selecionado.
-                                    arquivosSelecionados.remove(arquivoAnteriormenteSelecionado);
-                                    arquivoAnteriormenteSelecionado = null;
-                                }
-                            }
-                            //Adiciona o arquivo.
-                            arquivosSelecionados.add(file);
-                        } else {
-                            //Remove o arquivo.
-                            arquivosSelecionados.remove(file);
-                            arquivoAnteriormenteSelecionado = null;
-                        }
-                        //Marca o arquivo que foi selecionado.
-                        arquivoAnteriormenteSelecionadoCb = (CheckBox) buttonView;
-                        arquivoAnteriormenteSelecionado = file;
-                        //Atualiza o número de pastas selecionadas de acordo com a pluralidade.
-                        if (arquivosSelecionados.size() > 1) {
-                            mQuantidadeDeItensSelecionados.setText(
-                                    MaterialFileChooser.this.context.getString(R.string.quantidade_itens_selecionados_plural, arquivosSelecionados.size()));
-                        } else {
-                            mQuantidadeDeItensSelecionados.setText(
-                                    MaterialFileChooser.this.context.getString(R.string.quantidade_itens_selecionados_singular, arquivosSelecionados.size()));
-                        }
+                        //Seleciona ou deseleciona o arquivo.
+                        selecionarArquivo(buttonView, file, isChecked);
                     }
                 });
                 //Atualizar
@@ -210,6 +184,21 @@ public class MaterialFileChooser {
                     public void onRefresh() {
                         loadCurrentFolder();
                         mSwipeRefreshLayout.setRefreshing(false);
+                    }
+                });
+                //Selecionar tudo
+                mSelecionarTudo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                        //Seleciona ou não os arquivo da pasta atual.
+                        selecionarTudoStatus.put(pastaAtual, checked);
+                        for (File file : arquivosAtuais) {
+                            if (allowSelectFolder || !FileHelper.isFolder(file)) {
+                                selecionarArquivo(null, file, checked);
+                            }
+                        }
+                        //Recarrega os itens exibidos.
+                        loadCurrentFolder();
                     }
                 });
             }
@@ -221,11 +210,12 @@ public class MaterialFileChooser {
         allowCreateFolder(false);
         allowMultipleFiles(false);
         allowSelectFolder(false);
+        allowBrowsing(true);
         showFiles(true);
         showFolders(true);
+        restoreFolder(false);
         //Quantidade de itens inicial.
-        mQuantidadeDeItensSelecionados.setText(
-                context.getString(R.string.quantidade_itens_selecionados_plural, 0));
+        exibirQuantidadeDeItensSelecionados();
         //Adiciona os eventos
         mCaminhoDoDiretorio.setBreadCrumbListener(new BreadCrumbView.BreadCrumbListener<File>() {
             @Override
@@ -275,6 +265,49 @@ public class MaterialFileChooser {
         });
     }
 
+    private void selecionarArquivo(CompoundButton buttonView, File file, boolean selecionar) {
+        //Checkbox selecionado.
+        if (selecionar) {
+            //Não é multi-selecionável e tem um arquivo selecionado já.
+            if (!allowMultipleFiles && arquivoAnteriormenteSelecionadoCb != null) {
+                CheckBox cb = arquivoAnteriormenteSelecionadoCb;
+                arquivoAnteriormenteSelecionadoCb = null;
+                //Dois arquivos que estão na mesma pasta.
+                if (buttonView != cb &&
+                        Objects.equals(file.getParent(), arquivoAnteriormenteSelecionado.getParent())) {
+                    //Desmarca o que está selecionado.
+                    cb.setChecked(false);
+                } else {
+                    //Remove o que está selecionado.
+                    arquivosSelecionados.remove(arquivoAnteriormenteSelecionado);
+                    arquivoAnteriormenteSelecionado = null;
+                }
+            }
+            //Adiciona o arquivo.
+            arquivosSelecionados.add(file);
+        } else {
+            //Remove o arquivo.
+            arquivosSelecionados.remove(file);
+            arquivoAnteriormenteSelecionado = null;
+        }
+        //Marca o arquivo que foi selecionado.
+        arquivoAnteriormenteSelecionadoCb = (CheckBox) buttonView;
+        arquivoAnteriormenteSelecionado = file;
+        //Atualiza o número de pastas selecionadas de acordo com a pluralidade.
+        exibirQuantidadeDeItensSelecionados();
+    }
+
+    private void exibirQuantidadeDeItensSelecionados() {
+        //Atualiza o número de pastas selecionadas de acordo com a pluralidade.
+        if (arquivosSelecionados.size() > 1) {
+            mQuantidadeDeItensSelecionados.setText(
+                    context.getString(R.string.quantidade_itens_selecionados_plural, arquivosSelecionados.size()));
+        } else {
+            mQuantidadeDeItensSelecionados.setText(
+                    context.getString(R.string.quantidade_itens_selecionados_singular, arquivosSelecionados.size()));
+        }
+    }
+
     public MaterialFileChooser onFileChooserListener(OnFileChooserListener fileChooserListener) {
         this.fileChooserListener = fileChooserListener;
         return this;
@@ -302,11 +335,22 @@ public class MaterialFileChooser {
 
     public MaterialFileChooser allowMultipleFiles(boolean allowMultipleFiles) {
         this.allowMultipleFiles = allowMultipleFiles;
+        mSelecionarTudo.setVisibility(allowMultipleFiles ? View.VISIBLE : View.GONE);
+        return this;
+    }
+
+    public MaterialFileChooser allowBrowsing(boolean allowBrowsing) {
+        this.allowBrowsing = allowBrowsing;
         return this;
     }
 
     public MaterialFileChooser allowCreateFolder(boolean allowCreateFolder) {
         this.allowCreateFolder = allowCreateFolder;
+        return this;
+    }
+
+    public MaterialFileChooser restoreFolder(boolean restoreFolder) {
+        this.restoreFolder = restoreFolder;
         return this;
     }
 
@@ -317,6 +361,8 @@ public class MaterialFileChooser {
         pilhaDeCaminhos.clear();
         //Insere na pilha.
         pilhaDeCaminhos.addFirst(pastaAtual);
+        //Estado desta pasta.
+        selecionarTudoStatus.put(pastaAtual, false);
         return this;
     }
 
@@ -400,9 +446,11 @@ public class MaterialFileChooser {
     }
 
     private boolean backTo(File file) {
-        if (FileHelper.isFolder(file)) {
+        if (allowBrowsing && FileHelper.isFolder(file)) {
             pastaAtual = file;
             loadCurrentFolder();
+            //Define o estado do botão selecionar tudo.
+            mSelecionarTudo.setChecked(allowMultipleFiles && selecionarTudoStatus.get(file));
             return true;
         } else {
             return false;
@@ -410,8 +458,11 @@ public class MaterialFileChooser {
     }
 
     public boolean back() {
-        if (pilhaDeCaminhos.size() > 1) {
+        //Se pode navegar e há pasta pra navegar.
+        if (allowBrowsing && pilhaDeCaminhos.size() > 1) {
+            //Remove a pasta atual da pilha.
             pilhaDeCaminhos.removeFirst();
+            //Retorna para a pasta anterior.
             return backTo(pilhaDeCaminhos.getFirst());
         } else {
             return false;
@@ -419,10 +470,31 @@ public class MaterialFileChooser {
     }
 
     public void goTo(File file) {
-        if (FileHelper.isFolder(file)) {
+        if (!allowBrowsing) {
+            loadCurrentFolder();
+        } else if (FileHelper.isFolder(file)) {
             pastaAtual = file;
             pilhaDeCaminhos.addFirst(pastaAtual);
+            //Ainda não navegou nesta pasta. O selecionar tudo está desabilitado.
+            if (allowMultipleFiles && !selecionarTudoStatus.containsKey(file)) {
+                selecionarTudoStatus.put(file, false);
+            }
             loadCurrentFolder();
+            //Define o estado do botão selecionar tudo.
+            mSelecionarTudo.setChecked(allowMultipleFiles && selecionarTudoStatus.get(file));
+        }
+    }
+
+    public boolean goToPreviouslySelectedFolder() {
+        //Busca uma pasta anteriormente selecionada.
+        File folder = prefsManager.getPreviouslySelectedDiretory();
+        //Há uma pasta.
+        if (folder != null) {
+            //Vá para esta pasta.
+            goTo(folder);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -431,7 +503,12 @@ public class MaterialFileChooser {
     }
 
     public void show() {
-        loadCurrentFolder();
+        //Não é pra restaurar e não há pasta pra restaurar.
+        if (!restoreFolder || !goToPreviouslySelectedFolder()) {
+            //Abrir direto na pasta inicial.
+            goTo(initialFolder);
+        }
+        //Exibe o dialog.
         dialog = builder.show();
     }
 
@@ -547,6 +624,7 @@ public class MaterialFileChooser {
             mCampoDeBuscaBox = customView.findViewById(R.id.campoDeBuscaBox);
             mSwipeRefreshLayout = customView.findViewById(R.id.swipeRefreshLayout);
             mSwipeRefreshLayout.setColorSchemeColors(foregroundValue.data);
+            mSelecionarTudo = customView.findViewById(R.id.botaoSelecionarTudo);
 
             //TODO Opção pra que seja necessário selecionar algum arquivo para sair.
             //Eventos.
@@ -569,6 +647,12 @@ public class MaterialFileChooser {
                         //Dispara o evento.
                         fileChooserListener.onCancelled();
                     }
+                }
+            });
+            dismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    prefsManager.setPreviouslySelectedDiretory(pastaAtual);
                 }
             });
         }
