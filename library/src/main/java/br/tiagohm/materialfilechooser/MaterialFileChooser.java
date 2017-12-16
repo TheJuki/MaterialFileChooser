@@ -40,8 +40,6 @@ import br.tiagohm.easyadapter.EasyInjector;
 import br.tiagohm.easyadapter.Injector;
 
 //TODO Estensível para Dropbox, FTP, Drive, etc
-//TODO Botão de atualizar?
-//TODO Botão pra ver outras informações
 //TODO Icone com marcador de protegido/somente leitura, etc
 //TODO Exibir um indicador (talvez numérico) dizendo que a pasta possui itens selecionados
 //TODO Opção pra pré-visualizar um arquivo?
