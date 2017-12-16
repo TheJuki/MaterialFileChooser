@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements MaterialFileChoos
     private void showMaterialFileChooser() {
         new MaterialFileChooser(this, "Selecione um arquivo")
                 .allowSelectFolder(false)
-                .allowMultipleFiles(false)
+                .allowMultipleFiles(true)
                 .allowCreateFolder(false)
                 .showHiddenFiles(true)
                 .showFoldersFirst(true)
