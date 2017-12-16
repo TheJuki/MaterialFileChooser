@@ -25,19 +25,32 @@ Adicione ao seu projeto:
 ```java
 new MaterialFileChooser(Context, "Title")
     .allowSelectFolder(false)
+    .allowBrowsing(true)
     .allowMultipleFiles(false)
     .allowCreateFolder(false)
     .showHiddenFiles(false)
     .showFoldersFirst(true)
     .showFolders(true)
     .showFiles(true)
+    .restoreFolder(true)
+    .sorter(Sorter.SORT_BY_NEWEST_MODIFICATION)
+    //OR Logic
+    //.filter(new ExtensionFilter("jpg"))
+    //.filter(new ExtensionFilter("png"))
+    //AND Logic
+    //.filter(new ExtensionFilter(new RegexFilter(".*blablabla.*"), "jpg"))
     .initialFolder(Environment.getExternalStorageDirectory())
     .onFileChooserListener(new MaterialFileChooser.OnFileChooserListener() {
-                        @Override
-                        public void onItemSelected(List<File> files) {
-                            //
-                        }
-                    })
+          @Override
+          public void onItemSelected(List<File> files) {
+              //
+          }
+          
+          @Override
+          public void onCancelled() {
+            Toast.makeText(this, "A janela foi cancelada", Toast.LENGTH_SHORT).show();
+          }
+        })
     .show();
 ```
 
@@ -52,6 +65,12 @@ new MaterialFileChooser(Context, "Title")
 	<!-- Search hint text, file size, file modification date, etc -->
     <item name="mfc_theme_information_color">@color/grey</item>
 </style>
+```
+
+## Permissions
+```xml
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 ```
 
 ## License
