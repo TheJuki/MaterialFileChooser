@@ -40,13 +40,11 @@ import br.tiagohm.easyadapter.Injector;
 
 //TODO Estensível para Dropbox, FTP, Drive, etc
 //TODO Opção pra abrir o último diretório? Verificar se tem ultimo dir senão usar o initialFolder.
-//TODO Opção para selecionar tudo
 //TODO Botão de atualizar?
 //TODO Botão pra ver outras informações
 //TODO Icone com marcador de protegido/somente leitura, etc
 //TODO Exibir um indicador (talvez numérico) dizendo que a pasta possui itens selecionados
 //TODO Opção pra pré-visualizar um arquivo?
-//TODO Opção pra permitir ou não navegar pelas pastas
 public class MaterialFileChooser {
 
     public interface OnFileChooserListener {
@@ -77,6 +75,7 @@ public class MaterialFileChooser {
     //Variáveis
     private boolean showHiddenFiles;
     private boolean allowMultipleFiles;
+    private boolean allowBrowsing;
     //TODO Permitir a criação de diretório.
     private boolean allowCreateFolder;
     private boolean allowSelectFolder;
@@ -207,6 +206,7 @@ public class MaterialFileChooser {
         allowCreateFolder(false);
         allowMultipleFiles(false);
         allowSelectFolder(false);
+        allowBrowsing(true);
         showFiles(true);
         showFolders(true);
         //Quantidade de itens inicial.
@@ -334,6 +334,11 @@ public class MaterialFileChooser {
         return this;
     }
 
+    public MaterialFileChooser allowBrowsing(boolean allowBrowsing) {
+        this.allowBrowsing = allowBrowsing;
+        return this;
+    }
+
     public MaterialFileChooser allowCreateFolder(boolean allowCreateFolder) {
         this.allowCreateFolder = allowCreateFolder;
         return this;
@@ -429,7 +434,7 @@ public class MaterialFileChooser {
     }
 
     private boolean backTo(File file) {
-        if (FileHelper.isFolder(file)) {
+        if (allowBrowsing && FileHelper.isFolder(file)) {
             pastaAtual = file;
             loadCurrentFolder();
             //Define o estado do botão selecionar tudo.
@@ -441,7 +446,7 @@ public class MaterialFileChooser {
     }
 
     public boolean back() {
-        if (pilhaDeCaminhos.size() > 1) {
+        if (allowBrowsing && pilhaDeCaminhos.size() > 1) {
             pilhaDeCaminhos.removeFirst();
             return backTo(pilhaDeCaminhos.getFirst());
         } else {
@@ -450,7 +455,9 @@ public class MaterialFileChooser {
     }
 
     public void goTo(File file) {
-        if (FileHelper.isFolder(file)) {
+        if (!allowBrowsing) {
+            loadCurrentFolder();
+        } else if (FileHelper.isFolder(file)) {
             pastaAtual = file;
             pilhaDeCaminhos.addFirst(pastaAtual);
             //Ainda não navegou nesta pasta. O selecionar tudo está desabilitado.
