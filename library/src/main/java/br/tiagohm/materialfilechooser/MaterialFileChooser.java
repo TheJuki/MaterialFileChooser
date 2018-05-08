@@ -127,7 +127,48 @@ public class MaterialFileChooser {
         init(context);
     }
 
-    private void init(@NonNull Context context) {
+    private int getIconByExtension(Context context, File file) {
+        final int index = file.getName().lastIndexOf(".");
+        if (index < 0) return R.drawable.arquivo;
+        final String ext = file.getName().substring(index + 1).toLowerCase();
+        switch (ext) {
+            case "mp4":
+                return R.drawable.video;
+            case "c":
+            case "cpp":
+            case "cs":
+            case "js":
+            case "h":
+            case "java":
+            case "kt":
+            case "php":
+            case "xml":
+                return R.drawable.codigo;
+            case "avi":
+                return R.drawable.avi;
+            case "doc":
+                return R.drawable.doc;
+            case "flv":
+                return R.drawable.flv;
+            case "jpg":
+            case "jpeg":
+                return R.drawable.jpg;
+            case "json":
+                return R.drawable.json;
+            case "mov":
+                return R.drawable.mov;
+            case "mp3":
+                return R.drawable.mp3;
+            case "pdf":
+                return R.drawable.pdf;
+            case "txt":
+                return R.drawable.txt;
+            default:
+                return R.drawable.arquivo;
+        }
+    }
+
+    private void init(@NonNull final Context context) {
         //Preferencias.
         prefsManager = new PrefsManager(context);
         //Adapter.
@@ -138,8 +179,7 @@ public class MaterialFileChooser {
                 if (FileHelper.isFolder(file)) {
                     injector.image(R.id.iconeDoArquivo, R.drawable.pasta);
                 } else {
-                    //TODO Icone de acordo com a extensao do arquivo
-                    injector.image(R.id.iconeDoArquivo, R.drawable.arquivo);
+                    injector.image(R.id.iconeDoArquivo, getIconByExtension(context, file));
                 }
                 //Seta o texto com o nome do arquivo.
                 injector.text(R.id.nomeDoArquivo, file.getName());
