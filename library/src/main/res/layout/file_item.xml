@@ -34,6 +34,17 @@
                 android:layout_marginEnd="2dp"
                 android:src="@drawable/cadeado"
                 android:tint="?attr/mfc_theme_information_color" />
+
+            <ImageView
+                android:id="@+id/visibilidadeDoArquivo"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="0dp"
+                android:layout_marginStart="2dp"
+                android:src="@drawable/oculto"
+                android:tint="?attr/mfc_theme_information_color" />
         </RelativeLayout>
 
         <LinearLayout
