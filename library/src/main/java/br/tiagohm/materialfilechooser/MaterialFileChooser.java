@@ -48,13 +48,6 @@ import br.tiagohm.easyadapter.Injector;
 //TODO Opção pra pré-visualizar um arquivo?
 public class MaterialFileChooser {
 
-    public interface OnFileChooserListener {
-
-        void onItemSelected(List<File> files);
-
-        void onCancelled();
-    }
-
     //Variáveis finais.
     private final Builder builder;
     private final EasyAdapter listaDeArquivosEPastasAdapter = EasyAdapter.create();
@@ -94,6 +87,23 @@ public class MaterialFileChooser {
     private File arquivoAnteriormenteSelecionado = null;
     private OnFileChooserListener fileChooserListener;
     private String busca = null;
+    private final TextWatcher textWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            //nada
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            //nada
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            busca = s.toString().toLowerCase();
+            loadCurrentFolder();
+        }
+    };
     private List<Filter> filters = new ArrayList<>();
     private Sorter ordenacao = Sorter.SORT_BY_NAME_ASC;
     private Map<File, Boolean> selecionarTudoStatus = new ConcurrentHashMap<>();
@@ -254,24 +264,6 @@ public class MaterialFileChooser {
         mCampoDeBusca.removeTextChangedListener(textWatcher);
         mCampoDeBusca.addTextChangedListener(textWatcher);
     }
-
-    private final TextWatcher textWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            //nada
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            //nada
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            busca = s.toString().toLowerCase();
-            loadCurrentFolder();
-        }
-    };
 
     private void selecionarArquivo(CompoundButton buttonView, File file, boolean selecionar) {
         //Checkbox selecionado.
@@ -518,6 +510,13 @@ public class MaterialFileChooser {
         }
         //Exibe o dialog.
         dialog = builder.show();
+    }
+
+    public interface OnFileChooserListener {
+
+        void onItemSelected(List<File> files);
+
+        void onCancelled();
     }
 
     //Item para a pasta raiz.
