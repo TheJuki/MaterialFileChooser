@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:id="@+id/materialFileChooserLayout"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="?attr/mfc_theme_background_color"
-              android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/materialFileChooserLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/mfc_theme_background_color"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/titulo"
@@ -17,7 +17,7 @@
         android:paddingTop="15dp"
         android:text="Título"
         android:textColor="?attr/mfc_theme_foreground_color"
-        android:textSize="20sp"/>
+        android:textSize="20sp" />
 
     <br.tiagohm.breadcrumbview.BreadCrumbView
         android:id="@+id/caminhoDoDiretorio"
@@ -27,7 +27,7 @@
         android:layout_marginRight="5dp"
         android:background="#0000"
         app:bcv_separatorColor="?attr/mfc_theme_foreground_color"
-        app:bcv_textColor="?attr/mfc_theme_foreground_color"/>
+        app:bcv_textColor="?attr/mfc_theme_foreground_color" />
 
     <LinearLayout
         android:id="@+id/barraMenuSuperior"
@@ -44,7 +44,7 @@
             android:clickable="true"
             android:padding="4dp"
             android:src="@drawable/esquerda"
-            android:tint="?attr/mfc_theme_foreground_color"/>
+            android:tint="?attr/mfc_theme_foreground_color" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -60,7 +60,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:src="@drawable/tamanho"
-                android:tint="?attr/mfc_theme_foreground_color"/>
+                android:tint="?attr/mfc_theme_foreground_color" />
 
             <TextView
                 android:id="@+id/tamanhoTotal"
@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="864 MB"
-                android:textColor="?attr/mfc_theme_foreground_color"/>
+                android:textColor="?attr/mfc_theme_foreground_color" />
         </LinearLayout>
 
         <LinearLayout
@@ -85,7 +85,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:src="@drawable/items"
-                android:tint="?attr/mfc_theme_foreground_color"/>
+                android:tint="?attr/mfc_theme_foreground_color" />
 
             <TextView
                 android:id="@+id/quantidadeDeItens"
@@ -93,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="10"
-                android:textColor="?attr/mfc_theme_foreground_color"/>
+                android:textColor="?attr/mfc_theme_foreground_color" />
         </LinearLayout>
 
         <ImageView
@@ -106,7 +106,7 @@
             android:padding="4dp"
             android:src="@drawable/direita"
             android:tint="?attr/mfc_theme_foreground_color"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/irParaDiretorioInicial"
@@ -117,7 +117,7 @@
             android:clickable="true"
             android:padding="4dp"
             android:src="@drawable/home"
-            android:tint="?attr/mfc_theme_foreground_color"/>
+            android:tint="?attr/mfc_theme_foreground_color" />
 
         <ImageView
             android:id="@+id/botaoBuscar"
@@ -128,7 +128,7 @@
             android:clickable="true"
             android:padding="4dp"
             android:src="@drawable/busca"
-            android:tint="?attr/mfc_theme_foreground_color"/>
+            android:tint="?attr/mfc_theme_foreground_color" />
     </LinearLayout>
 
     <FrameLayout
@@ -139,21 +139,14 @@
         android:layout_marginRight="15dp"
         android:visibility="gone">
 
-        <com.lapism.searchview.SearchView
+        <EditText
             android:id="@+id/campoDeBusca"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_marginLeft="-48dp"
+            android:background="?attr/mfc_theme_background_color"
             android:gravity="center"
-            app:search_background_color="?attr/mfc_theme_background_color"
-            app:search_clear_on_open="true"
-            app:search_elevation="0dp"
-            app:search_hint="@android:string/search_go"
-            app:search_hint_color="?attr/mfc_theme_information_color"
-            app:search_icon_color="?attr/mfc_theme_foreground_color"
-            app:search_navigation_icon="@drawable/busca"
-            app:search_shadow="false"
-            app:search_text_color="?attr/mfc_theme_foreground_color"/>
+            android:hint="@android:string/search_go"
+            android:textColorHint="?attr/mfc_theme_information_color" />
     </FrameLayout>
 
     <LinearLayout
@@ -170,7 +163,7 @@
             android:paddingBottom="5dp"
             android:paddingTop="5dp"
             android:text="3 itens selecionados"
-            android:textColor="?attr/mfc_theme_foreground_color"/>
+            android:textColor="?attr/mfc_theme_foreground_color" />
 
         <android.support.v7.widget.AppCompatCheckBox
             android:id="@+id/botaoSelecionarTudo"
@@ -178,7 +171,7 @@
             android:layout_height="wrap_content"
             android:buttonTint="?attr/mfc_theme_foreground_color"
             android:checked="false"
-            android:paddingRight="5dp"/>
+            android:paddingRight="5dp" />
     </LinearLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
@@ -190,6 +183,6 @@
             android:id="@+id/listaDeArquivosEPastas"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:minHeight="200dp"/>
+            android:minHeight="200dp" />
     </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>

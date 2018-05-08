@@ -1,6 +1,5 @@
 package br.tiagohm.materialfilechooser;
 
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Environment;
@@ -9,17 +8,19 @@ import android.support.annotation.StringRes;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.lapism.searchview.SearchView;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -69,7 +70,7 @@ public class MaterialFileChooser {
     private TextView mQuantidadeDeItensSelecionados;
     private ImageView mBotaoBuscar;
     private View mCampoDeBuscaBox;
-    private SearchView mCampoDeBusca;
+    private EditText mCampoDeBusca;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private CheckBox mSelecionarTudo;
     //Variáveis
@@ -250,20 +251,27 @@ public class MaterialFileChooser {
                 }
             }
         });
-        mCampoDeBusca.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                busca = newText.toLowerCase();
-                loadCurrentFolder();
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-        });
+        mCampoDeBusca.removeTextChangedListener(textWatcher);
+        mCampoDeBusca.addTextChangedListener(textWatcher);
     }
+
+    private final TextWatcher textWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            //nada
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            //nada
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            busca = s.toString().toLowerCase();
+            loadCurrentFolder();
+        }
+    };
 
     private void selecionarArquivo(CompoundButton buttonView, File file, boolean selecionar) {
         //Checkbox selecionado.
