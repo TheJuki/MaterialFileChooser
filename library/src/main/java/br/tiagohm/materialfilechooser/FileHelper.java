@@ -113,4 +113,7 @@ public class FileHelper {
     }
 
 
+    public static boolean isProtected(File file) {
+        return !file.canRead() || !file.canWrite();
+    }
 }

@@ -1,6 +1,5 @@
 package br.tiagohm.materialfilechooser;
 
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Environment;
@@ -9,17 +8,19 @@ import android.support.annotation.StringRes;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.lapism.searchview.SearchView;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -45,13 +46,6 @@ import br.tiagohm.easyadapter.Injector;
 //TODO Opção pra pré-visualizar um arquivo?
 public class MaterialFileChooser {
 
-    public interface OnFileChooserListener {
-
-        void onItemSelected(List<File> files);
-
-        void onCancelled();
-    }
-
     //Variáveis finais.
     private final Builder builder;
     private final EasyAdapter listaDeArquivosEPastasAdapter = EasyAdapter.create();
@@ -67,7 +61,7 @@ public class MaterialFileChooser {
     private TextView mQuantidadeDeItensSelecionados;
     private ImageView mBotaoBuscar;
     private View mCampoDeBuscaBox;
-    private SearchView mCampoDeBusca;
+    private EditText mCampoDeBusca;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private CheckBox mSelecionarTudo;
     //Variáveis
@@ -91,6 +85,24 @@ public class MaterialFileChooser {
     private File arquivoAnteriormenteSelecionado = null;
     private OnFileChooserListener fileChooserListener;
     private String busca = null;
+    private int minSelectedItems = 0;
+    private final TextWatcher textWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            //nada
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            //nada
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            busca = s.toString().toLowerCase();
+            loadCurrentFolder();
+        }
+    };
     private List<Filter> filters = new ArrayList<>();
     private Sorter ordenacao = Sorter.SORT_BY_NAME_ASC;
     private Map<File, Boolean> selecionarTudoStatus = new ConcurrentHashMap<>();
@@ -114,7 +126,48 @@ public class MaterialFileChooser {
         init(context);
     }
 
-    private void init(@NonNull Context context) {
+    private int getIconByExtension(Context context, File file) {
+        final int index = file.getName().lastIndexOf(".");
+        if (index < 0) return R.drawable.arquivo;
+        final String ext = file.getName().substring(index + 1).toLowerCase();
+        switch (ext) {
+            case "mp4":
+                return R.drawable.video;
+            case "c":
+            case "cpp":
+            case "cs":
+            case "js":
+            case "h":
+            case "java":
+            case "kt":
+            case "php":
+            case "xml":
+                return R.drawable.codigo;
+            case "avi":
+                return R.drawable.avi;
+            case "doc":
+                return R.drawable.doc;
+            case "flv":
+                return R.drawable.flv;
+            case "jpg":
+            case "jpeg":
+                return R.drawable.jpg;
+            case "json":
+                return R.drawable.json;
+            case "mov":
+                return R.drawable.mov;
+            case "mp3":
+                return R.drawable.mp3;
+            case "pdf":
+                return R.drawable.pdf;
+            case "txt":
+                return R.drawable.txt;
+            default:
+                return R.drawable.arquivo;
+        }
+    }
+
+    private void init(@NonNull final Context context) {
         //Preferencias.
         prefsManager = new PrefsManager(context);
         //Adapter.
@@ -125,8 +178,13 @@ public class MaterialFileChooser {
                 if (FileHelper.isFolder(file)) {
                     injector.image(R.id.iconeDoArquivo, R.drawable.pasta);
                 } else {
-                    //TODO Icone de acordo com a extensao do arquivo
-                    injector.image(R.id.iconeDoArquivo, R.drawable.arquivo);
+                    injector.image(R.id.iconeDoArquivo, getIconByExtension(context, file));
+                }
+                //Seta o ícone de arquivo protegido.
+                if (FileHelper.isProtected(file)) {
+                    injector.image(R.id.protecaoDoArquivo, R.drawable.cadeado);
+                } else {
+                    injector.image(R.id.protecaoDoArquivo, null);
                 }
                 //Seta o texto com o nome do arquivo.
                 injector.text(R.id.nomeDoArquivo, file.getName());
@@ -212,6 +270,7 @@ public class MaterialFileChooser {
         showFiles(true);
         showFolders(true);
         restoreFolder(false);
+        minSelectedItems(0);
         //Quantidade de itens inicial.
         exibirQuantidadeDeItensSelecionados();
         //Adiciona os eventos
@@ -248,19 +307,8 @@ public class MaterialFileChooser {
                 }
             }
         });
-        mCampoDeBusca.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                busca = newText.toLowerCase();
-                loadCurrentFolder();
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-        });
+        mCampoDeBusca.removeTextChangedListener(textWatcher);
+        mCampoDeBusca.addTextChangedListener(textWatcher);
     }
 
     private void selecionarArquivo(CompoundButton buttonView, File file, boolean selecionar) {
@@ -339,6 +387,11 @@ public class MaterialFileChooser {
 
     public MaterialFileChooser allowBrowsing(boolean allowBrowsing) {
         this.allowBrowsing = allowBrowsing;
+        return this;
+    }
+
+    public MaterialFileChooser minSelectedItems(int minSelectedItems) {
+        this.minSelectedItems = Math.max(minSelectedItems, 0);
         return this;
     }
 
@@ -510,6 +563,13 @@ public class MaterialFileChooser {
         dialog = builder.show();
     }
 
+    public interface OnFileChooserListener {
+
+        void onItemSelected(List<File> files);
+
+        void onCancelled();
+    }
+
     //Item para a pasta raiz.
     private static class RootFileBreadCrumItem extends FileBreadCrumItem {
 
@@ -607,6 +667,7 @@ public class MaterialFileChooser {
             negativeColor(foregroundValue.data);
             cancelable(false);
             canceledOnTouchOutside(false);
+            autoDismiss(false);
 
             mCaminhoDoDiretorio = customView.findViewById(R.id.caminhoDoDiretorio);
             mListaDeArquivosEPastas = customView.findViewById(R.id.listaDeArquivosEPastas);
@@ -629,21 +690,27 @@ public class MaterialFileChooser {
             onPositive(new MaterialDialog.SingleButtonCallback() {
                 @Override
                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                    if (fileChooserListener != null) {
-                        //Cria a lista com os arquivos selecionados.
-                        final List<File> files = new ArrayList<>(arquivosSelecionados.size());
-                        files.addAll(arquivosSelecionados);
-                        //Dispara o evento passando a lista.
-                        fileChooserListener.onItemSelected(Collections.unmodifiableList(files));
+                    if (arquivosSelecionados.size() >= minSelectedItems) {
+                        if (fileChooserListener != null) {
+                            //Cria a lista com os arquivos selecionados.
+                            final List<File> files = new ArrayList<>(arquivosSelecionados.size());
+                            files.addAll(arquivosSelecionados);
+                            //Dispara o evento passando a lista.
+                            fileChooserListener.onItemSelected(Collections.unmodifiableList(files));
+                        }
+                        dialog.dismiss();
                     }
                 }
             });
             onNegative(new MaterialDialog.SingleButtonCallback() {
                 @Override
                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                    if (fileChooserListener != null) {
+                    if (arquivosSelecionados.size() >= minSelectedItems) {
                         //Dispara o evento.
-                        fileChooserListener.onCancelled();
+                        if (fileChooserListener != null) {
+                            fileChooserListener.onCancelled();
+                        }
+                        dialog.dismiss();
                     }
                 }
             });
