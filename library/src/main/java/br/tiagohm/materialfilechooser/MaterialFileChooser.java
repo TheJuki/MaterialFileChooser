@@ -182,6 +182,12 @@ public class MaterialFileChooser {
                 } else {
                     injector.image(R.id.iconeDoArquivo, getIconByExtension(context, file));
                 }
+                //Seta o ícone de arquivo protegido.
+                if (FileHelper.isProtected(file)) {
+                    injector.image(R.id.protecaoDoArquivo, R.drawable.cadeado);
+                } else {
+                    injector.image(R.id.protecaoDoArquivo, null);
+                }
                 //Seta o texto com o nome do arquivo.
                 injector.text(R.id.nomeDoArquivo, file.getName());
                 //Seta o tamanho do arquivo.
