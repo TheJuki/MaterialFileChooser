@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements MaterialFileChoos
                 .showFolders(true)
                 .showFiles(true)
                 .restoreFolder(true)
+                .minSelectedItems(1)
                 //.initialFolder(Environment.getExternalStorageDirectory())
                 .onFileChooserListener(this)
                 //OR Logic

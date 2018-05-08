@@ -87,6 +87,7 @@ public class MaterialFileChooser {
     private File arquivoAnteriormenteSelecionado = null;
     private OnFileChooserListener fileChooserListener;
     private String busca = null;
+    private int minSelectedItems = 0;
     private final TextWatcher textWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -265,6 +266,7 @@ public class MaterialFileChooser {
         showFiles(true);
         showFolders(true);
         restoreFolder(false);
+        minSelectedItems(0);
         //Quantidade de itens inicial.
         exibirQuantidadeDeItensSelecionados();
         //Adiciona os eventos
@@ -381,6 +383,11 @@ public class MaterialFileChooser {
 
     public MaterialFileChooser allowBrowsing(boolean allowBrowsing) {
         this.allowBrowsing = allowBrowsing;
+        return this;
+    }
+
+    public MaterialFileChooser minSelectedItems(int minSelectedItems) {
+        this.minSelectedItems = Math.max(minSelectedItems, 0);
         return this;
     }
 
@@ -656,6 +663,7 @@ public class MaterialFileChooser {
             negativeColor(foregroundValue.data);
             cancelable(false);
             canceledOnTouchOutside(false);
+            autoDismiss(false);
 
             mCaminhoDoDiretorio = customView.findViewById(R.id.caminhoDoDiretorio);
             mListaDeArquivosEPastas = customView.findViewById(R.id.listaDeArquivosEPastas);
@@ -678,21 +686,27 @@ public class MaterialFileChooser {
             onPositive(new MaterialDialog.SingleButtonCallback() {
                 @Override
                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                    if (fileChooserListener != null) {
-                        //Cria a lista com os arquivos selecionados.
-                        final List<File> files = new ArrayList<>(arquivosSelecionados.size());
-                        files.addAll(arquivosSelecionados);
-                        //Dispara o evento passando a lista.
-                        fileChooserListener.onItemSelected(Collections.unmodifiableList(files));
+                    if (arquivosSelecionados.size() >= minSelectedItems) {
+                        if (fileChooserListener != null) {
+                            //Cria a lista com os arquivos selecionados.
+                            final List<File> files = new ArrayList<>(arquivosSelecionados.size());
+                            files.addAll(arquivosSelecionados);
+                            //Dispara o evento passando a lista.
+                            fileChooserListener.onItemSelected(Collections.unmodifiableList(files));
+                        }
+                        dialog.dismiss();
                     }
                 }
             });
             onNegative(new MaterialDialog.SingleButtonCallback() {
                 @Override
                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                    if (fileChooserListener != null) {
+                    if (arquivosSelecionados.size() >= minSelectedItems) {
                         //Dispara o evento.
-                        fileChooserListener.onCancelled();
+                        if (fileChooserListener != null) {
+                            fileChooserListener.onCancelled();
+                        }
+                        dialog.dismiss();
                     }
                 }
             });
