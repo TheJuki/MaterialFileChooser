@@ -41,10 +41,7 @@ import br.tiagohm.easyadapter.EasyInjector;
 import br.tiagohm.easyadapter.Injector;
 
 //TODO Estensível para Dropbox, FTP, Drive, etc
-//TODO Botão de atualizar?
 //TODO Botão pra ver outras informações
-//TODO Icone com marcador de protegido/somente leitura, etc
-//TODO Exibir um indicador (talvez numérico) dizendo que a pasta possui itens selecionados
 //TODO Opção pra pré-visualizar um arquivo?
 public class MaterialFileChooser {
 
@@ -169,6 +166,15 @@ public class MaterialFileChooser {
         }
     }
 
+    private boolean constainsSelectedChildren(File parent) {
+        for (File file : arquivosSelecionados) {
+            if (file.getAbsolutePath().startsWith(parent.getAbsolutePath())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void init(@NonNull final Context context) {
         //Preferencias.
         prefsManager = new PrefsManager(context);
@@ -187,6 +193,12 @@ public class MaterialFileChooser {
                     injector.image(R.id.protecaoDoArquivo, R.drawable.cadeado);
                 } else {
                     injector.image(R.id.protecaoDoArquivo, null);
+                }
+                //Seta o ícone de que contém arquivos selecionados.
+                if (FileHelper.isFolder(file) && constainsSelectedChildren(file)) {
+                    injector.image(R.id.pastaComItensSelecionados, R.drawable.asterisco);
+                } else {
+                    injector.image(R.id.pastaComItensSelecionados, null);
                 }
                 //Seta a opacidade se o arquivo é oculto.
                 if (FileHelper.isHidden(file)) {
@@ -693,7 +705,6 @@ public class MaterialFileChooser {
             mSwipeRefreshLayout.setColorSchemeColors(foregroundValue.data);
             mSelecionarTudo = customView.findViewById(R.id.botaoSelecionarTudo);
 
-            //TODO Opção pra que seja necessário selecionar algum arquivo para sair.
             //Eventos.
             onPositive(new MaterialDialog.SingleButtonCallback() {
                 @Override
