@@ -190,9 +190,9 @@ public class MaterialFileChooser {
                 }
                 //Seta a opacidade se o arquivo é oculto.
                 if (FileHelper.isHidden(file)) {
-                    injector.image(R.id.visibilidadeDoArquivo, R.drawable.oculto);
+                    injector.find(R.id.iconeDoArquivo).setAlpha(0.4f);
                 } else {
-                    injector.image(R.id.visibilidadeDoArquivo, null);
+                    injector.find(R.id.iconeDoArquivo).setAlpha(1f);
                 }
                 //Seta o texto com o nome do arquivo.
                 injector.text(R.id.nomeDoArquivo, file.getName());
