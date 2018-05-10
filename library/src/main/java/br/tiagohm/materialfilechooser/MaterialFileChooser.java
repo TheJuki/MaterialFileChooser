@@ -175,7 +175,8 @@ public class MaterialFileChooser {
 
     private boolean constainsSelectedChildren(File parent) {
         for (File file : arquivosSelecionados) {
-            if (file.getAbsolutePath().startsWith(parent.getAbsolutePath())) {
+            if (!file.getAbsolutePath().equals(parent.getAbsolutePath()) &&
+                    file.getAbsolutePath().startsWith(parent.getAbsolutePath())) {
                 return true;
             }
         }
