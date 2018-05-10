@@ -2,8 +2,8 @@
     <string name="app_name" translatable="false">MaterialFileChooser</string>
     <string name="quantidade_itens_pasta_singular">%d item</string>
     <string name="quantidade_itens_pasta_plural">%d items</string>
-    <string name="quantidade_itens_selecionados_singular">%d selected item</string>
-    <string name="quantidade_itens_selecionados_plural">%d selected items</string>
+    <string name="quantidade_itens_selecionados_singular">%d selected item (%s)</string>
+    <string name="quantidade_itens_selecionados_plural">%d selected items (%s)</string>
     <string name="criar_pasta_edittext_hint">Type the folder name here</string>
     <string name="criar_pasta_title">Create a new folder</string>
 </resources>

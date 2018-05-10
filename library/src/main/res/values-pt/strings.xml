@@ -2,8 +2,8 @@
 <resources>
     <string name="quantidade_itens_pasta_singular">%d item</string>
     <string name="quantidade_itens_pasta_plural">%d itens</string>
-    <string name="quantidade_itens_selecionados_singular">%d item selecionado</string>
-    <string name="quantidade_itens_selecionados_plural">%d itens selecionados</string>
+    <string name="quantidade_itens_selecionados_singular">%d item selecionado (%s)</string>
+    <string name="quantidade_itens_selecionados_plural">%d itens selecionados (%s)</string>
     <string name="criar_pasta_edittext_hint">Digite o nome da pasta aqui</string>
     <string name="criar_pasta_title">Criar uma nova pasta</string>
 </resources>

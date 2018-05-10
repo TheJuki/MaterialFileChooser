@@ -49,8 +49,7 @@ public class FileHelper {
         }
     }
 
-    public static String sizeAsString(File file, boolean recursive) {
-        final long size = sizeInBytes(file, recursive);
+    public static String sizeToString(long size) {
         if (size >= 1024 * 1024 * 1024) {
             return String.format("%.1f", size / (float) (1024 * 1024 * 1024)) + " GB";
         } else if (size >= 1024 * 1024) {
@@ -60,6 +59,11 @@ public class FileHelper {
         } else {
             return size + " B";
         }
+    }
+
+    public static String sizeAsString(File file, boolean recursive) {
+        final long size = sizeInBytes(file, recursive);
+        return sizeToString(size);
     }
 
     public static String lastModified(File file) {

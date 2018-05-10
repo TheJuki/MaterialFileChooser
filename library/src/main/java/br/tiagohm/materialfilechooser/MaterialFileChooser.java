@@ -1,5 +1,6 @@
 package br.tiagohm.materialfilechooser;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
@@ -84,6 +85,7 @@ public class MaterialFileChooser {
     private LinkedList<File> pilhaDeCaminhos = new LinkedList<>();
     private List<File> arquivosAtuais;
     private Set<File> arquivosSelecionados = Collections.newSetFromMap(new ConcurrentHashMap<File, Boolean>());
+    private long tamanhoTotalDosArquivosSelecionados = 0;
     private ChooserFileFilter chooserFileFilter = new ChooserFileFilter();
     private CheckBox arquivoAnteriormenteSelecionadoCb = null;
     private File arquivoAnteriormenteSelecionado = null;
@@ -391,9 +393,15 @@ public class MaterialFileChooser {
                 }
             }
             //Adiciona o arquivo.
+            if (!arquivosSelecionados.contains(file)) {
+                tamanhoTotalDosArquivosSelecionados += FileHelper.isFolder(file) ? 0 : file.length();
+            }
             arquivosSelecionados.add(file);
         } else {
             //Remove o arquivo.
+            if (arquivosSelecionados.contains(file)) {
+                tamanhoTotalDosArquivosSelecionados -= FileHelper.isFolder(file) ? 0 : file.length();
+            }
             arquivosSelecionados.remove(file);
             arquivoAnteriormenteSelecionado = null;
         }
@@ -404,14 +412,15 @@ public class MaterialFileChooser {
         exibirQuantidadeDeItensSelecionados();
     }
 
+    @SuppressLint("StringFormatMatches")
     private void exibirQuantidadeDeItensSelecionados() {
         //Atualiza o número de pastas selecionadas de acordo com a pluralidade.
         if (arquivosSelecionados.size() > 1) {
             mQuantidadeDeItensSelecionados.setText(
-                    context.getString(R.string.quantidade_itens_selecionados_plural, arquivosSelecionados.size()));
+                    context.getString(R.string.quantidade_itens_selecionados_plural, arquivosSelecionados.size(), FileHelper.sizeToString(tamanhoTotalDosArquivosSelecionados)));
         } else {
             mQuantidadeDeItensSelecionados.setText(
-                    context.getString(R.string.quantidade_itens_selecionados_singular, arquivosSelecionados.size()));
+                    context.getString(R.string.quantidade_itens_selecionados_singular, arquivosSelecionados.size(), FileHelper.sizeToString(tamanhoTotalDosArquivosSelecionados)));
         }
     }
 
