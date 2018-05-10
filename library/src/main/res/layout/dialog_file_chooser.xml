@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/materialFileChooserLayout"
     android:layout_width="match_parent"
@@ -23,6 +23,7 @@
         android:id="@+id/caminhoDoDiretorio"
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        android:layout_below="@id/titulo"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
         android:background="#0000"
@@ -33,6 +34,7 @@
         android:id="@+id/barraMenuSuperior"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/caminhoDoDiretorio"
         android:gravity="center|top">
 
         <ImageView
@@ -137,6 +139,7 @@
         android:id="@+id/campoDeBuscaBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/barraMenuSuperior"
         android:layout_marginLeft="25dp"
         android:layout_marginRight="15dp"
         android:visibility="gone">
@@ -152,8 +155,10 @@
     </FrameLayout>
 
     <LinearLayout
+        android:id="@+id/quantidadeDeItensSelecionadosBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/campoDeBuscaBox"
         android:orientation="horizontal">
 
         <TextView
@@ -179,12 +184,28 @@
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@id/quantidadeDeItensSelecionadosBox">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/listaDeArquivosEPastas"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:minHeight="200dp" />
+            android:clipToPadding="false"
+            android:minHeight="200dp"
+            android:paddingBottom="50dp" />
     </android.support.v4.widget.SwipeRefreshLayout>
-</LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/criarPasta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:src="@drawable/nova_pasta"
+        android:tint="?attr/mfc_theme_background_color"
+        app:backgroundTint="?attr/mfc_theme_foreground_color"
+        app:elevation="0dp"
+        app:fabSize="normal" />
+</RelativeLayout>

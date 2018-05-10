@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements MaterialFileChoos
                 .allowSelectFolder(false)
                 .allowBrowsing(true)
                 .allowMultipleFiles(true)
-                .allowCreateFolder(false)
+                .allowCreateFolder(true)
                 .showHiddenFiles(true)
                 .showFoldersFirst(true)
                 .showFolders(true)
