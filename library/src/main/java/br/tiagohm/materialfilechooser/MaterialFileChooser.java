@@ -1,14 +1,18 @@
 package br.tiagohm.materialfilechooser;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.TypedValue;
@@ -18,6 +22,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -63,6 +68,7 @@ public class MaterialFileChooser {
     private EditText mCampoDeBusca;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private CheckBox mSelecionarTudo;
+    private FloatingActionButton mBotaoCriarPasta;
     //Variáveis
     private boolean showHiddenFiles;
     private boolean allowMultipleFiles;
@@ -79,6 +85,7 @@ public class MaterialFileChooser {
     private LinkedList<File> pilhaDeCaminhos = new LinkedList<>();
     private List<File> arquivosAtuais;
     private Set<File> arquivosSelecionados = Collections.newSetFromMap(new ConcurrentHashMap<File, Boolean>());
+    private long tamanhoTotalDosArquivosSelecionados = 0;
     private ChooserFileFilter chooserFileFilter = new ChooserFileFilter();
     private CheckBox arquivoAnteriormenteSelecionadoCb = null;
     private File arquivoAnteriormenteSelecionado = null;
@@ -168,7 +175,8 @@ public class MaterialFileChooser {
 
     private boolean constainsSelectedChildren(File parent) {
         for (File file : arquivosSelecionados) {
-            if (file.getAbsolutePath().startsWith(parent.getAbsolutePath())) {
+            if (!file.getAbsolutePath().equals(parent.getAbsolutePath()) &&
+                    file.getAbsolutePath().startsWith(parent.getAbsolutePath())) {
                 return true;
             }
         }
@@ -178,6 +186,13 @@ public class MaterialFileChooser {
     private void init(@NonNull final Context context) {
         //Preferencias.
         prefsManager = new PrefsManager(context);
+        //Cores.
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = context.getTheme();
+        theme.resolveAttribute(R.attr.mfc_theme_foreground_color, typedValue, true);
+        final int foregroundColor = typedValue.data;
+        theme.resolveAttribute(R.attr.mfc_theme_background_color, typedValue, true);
+        final int backgroundColor = typedValue.data;
         //Adapter.
         listaDeArquivosEPastasAdapter.register(File.class, R.layout.file_item, new EasyInjector<File>() {
             @Override
@@ -329,6 +344,35 @@ public class MaterialFileChooser {
         });
         mCampoDeBusca.removeTextChangedListener(textWatcher);
         mCampoDeBusca.addTextChangedListener(textWatcher);
+        mBotaoCriarPasta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new MaterialDialog.Builder(context)
+                        .title(R.string.criar_pasta_title)
+                        .titleColor(foregroundColor)
+                        .inputRangeRes(1, -1, R.color.criar_pasta_input_out_range)
+                        .inputType(InputType.TYPE_CLASS_TEXT)
+                        .negativeText(android.R.string.cancel)
+                        .negativeColor(foregroundColor)
+                        .positiveColor(foregroundColor)
+                        .backgroundColor(backgroundColor)
+                        .input(R.string.criar_pasta_edittext_hint, 0, false, new MaterialDialog.InputCallback() {
+                            @Override
+                            public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+                                final File novaPasta = new File(pastaAtual, input.toString());
+                                try {
+                                    if (!novaPasta.mkdir()) {
+                                        Toast.makeText(context, "error", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        loadCurrentFolder();
+                                    }
+                                } catch (Exception e) {
+                                    Toast.makeText(context, "error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }).show();
+            }
+        });
     }
 
     private void selecionarArquivo(CompoundButton buttonView, File file, boolean selecionar) {
@@ -350,9 +394,15 @@ public class MaterialFileChooser {
                 }
             }
             //Adiciona o arquivo.
+            if (!arquivosSelecionados.contains(file)) {
+                tamanhoTotalDosArquivosSelecionados += FileHelper.isFolder(file) ? 0 : file.length();
+            }
             arquivosSelecionados.add(file);
         } else {
             //Remove o arquivo.
+            if (arquivosSelecionados.contains(file)) {
+                tamanhoTotalDosArquivosSelecionados -= FileHelper.isFolder(file) ? 0 : file.length();
+            }
             arquivosSelecionados.remove(file);
             arquivoAnteriormenteSelecionado = null;
         }
@@ -363,14 +413,15 @@ public class MaterialFileChooser {
         exibirQuantidadeDeItensSelecionados();
     }
 
+    @SuppressLint("StringFormatMatches")
     private void exibirQuantidadeDeItensSelecionados() {
         //Atualiza o número de pastas selecionadas de acordo com a pluralidade.
         if (arquivosSelecionados.size() > 1) {
             mQuantidadeDeItensSelecionados.setText(
-                    context.getString(R.string.quantidade_itens_selecionados_plural, arquivosSelecionados.size()));
+                    context.getString(R.string.quantidade_itens_selecionados_plural, arquivosSelecionados.size(), FileHelper.sizeToString(tamanhoTotalDosArquivosSelecionados)));
         } else {
             mQuantidadeDeItensSelecionados.setText(
-                    context.getString(R.string.quantidade_itens_selecionados_singular, arquivosSelecionados.size()));
+                    context.getString(R.string.quantidade_itens_selecionados_singular, arquivosSelecionados.size(), FileHelper.sizeToString(tamanhoTotalDosArquivosSelecionados)));
         }
     }
 
@@ -417,6 +468,7 @@ public class MaterialFileChooser {
 
     public MaterialFileChooser allowCreateFolder(boolean allowCreateFolder) {
         this.allowCreateFolder = allowCreateFolder;
+        mBotaoCriarPasta.setVisibility(allowCreateFolder ? View.VISIBLE : View.GONE);
         return this;
     }
 
@@ -704,6 +756,7 @@ public class MaterialFileChooser {
             mSwipeRefreshLayout = customView.findViewById(R.id.swipeRefreshLayout);
             mSwipeRefreshLayout.setColorSchemeColors(foregroundValue.data);
             mSelecionarTudo = customView.findViewById(R.id.botaoSelecionarTudo);
+            mBotaoCriarPasta = customView.findViewById(R.id.criarPasta);
 
             //Eventos.
             onPositive(new MaterialDialog.SingleButtonCallback() {
