@@ -7,7 +7,7 @@
 ## Dependencies
 
 Adicione ao seu projeto:
-```gradle
+```groovy
 	allprojects {
 		repositories {
 			...
@@ -15,55 +15,59 @@ Adicione ao seu projeto:
 		}
 	}
 ```
-```gradle
+```groovy
 	dependencies {
 	        compile 'com.github.tiagohm:MaterialFileChooser:VERSION'
 	}
 ```
 
 ## How to use
-```java
-new MaterialFileChooser(Context, "Title")
-    .allowSelectFolder(false)
-    .allowBrowsing(true)
-    .allowMultipleFiles(false)
-    .allowCreateFolder(false)
-    .showHiddenFiles(false)
-    .showFoldersFirst(true)
-    .showFolders(true)
-    .showFiles(true)
-    .restoreFolder(true)
-    .sorter(Sorter.SORT_BY_NEWEST_MODIFICATION)
-    //OR Logic
-    //.filter(new ExtensionFilter("jpg"))
-    //.filter(new ExtensionFilter("png"))
-    //AND Logic
-    //.filter(new ExtensionFilter(new RegexFilter(".*blablabla.*"), "jpg"))
-    .initialFolder(Environment.getExternalStorageDirectory())
-    .onFileChooserListener(new MaterialFileChooser.OnFileChooserListener() {
-          @Override
-          public void onItemSelected(List<File> files) {
-              //
-          }
-          
-          @Override
-          public void onCancelled() {
-            Toast.makeText(this, "A janela foi cancelada", Toast.LENGTH_SHORT).show();
-          }
-        })
-    .show();
+```kotlin
+MaterialFileChooser(this,
+                allowBrowsing = true,
+                allowCreateFolder = true,
+                allowMultipleFiles = true,
+                allowSelectFolder = true,
+                minSelectedFiles = 1,
+                maxSelectedFiles = 3,
+                showFiles = true,
+                showFoldersFirst = true,
+                showFolders = true,
+                showHiddenFiles = false,
+                initialFolder = Environment.getRootDirectory(),
+                restoreFolder = false)
+                .title("Selecione um arquivo")
+                .sorter(Sorter.ByNewestModification)
+                .onSelectedFilesListener {
+                    Toast.makeText(this, it.toString(), Toast.LENGTH_SHORT).show()
+                }
+                .show()
 ```
 
-## Customization
+## Customisation
+
 ```xml
 <!-- Base application theme. -->
 <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
     <!-- Customize your theme here. -->
     
-    <item name="mfc_theme_background_color">@color/white</item>
-    <item name="mfc_theme_foreground_color">@color/green</item>
-	<!-- Search hint text, file size, file modification date, etc -->
-    <item name="mfc_theme_information_color">@color/grey</item>
+    <item name="mfc_theme_background">@color/corDefundo</item>
+    <item name="mfc_theme_foreground">@color/colorPrimary</item>
+    <item name="mfc_theme_title">@color/cinzaEscuro</item>
+    <item name="mfc_theme_breadcrumb">@color/azulClaro</item>
+    <item name="mfc_theme_toolbox">@color/colorPrimary</item>
+    <item name="mfc_theme_search_text">@color/cinzaEscuro</item>
+    <item name="mfc_theme_search_hint">@color/cinzaClaro</item>
+    <item name="mfc_theme_status">@color/colorPrimary</item>
+    <item name="mfc_theme_file_icon">@color/colorPrimary</item>
+    <item name="mfc_theme_file_name">@color/colorPrimary</item>
+    <item name="mfc_theme_file_information">@color/colorAccent</item>
+    <item name="mfc_theme_file_flag">@color/cinzaClaro</item>
+    <item name="mfc_theme_file_asterisk">@color/amarelo</item>
+    <item name="mfc_theme_checkbox">@color/colorAccent</item>
+    <item name="mfc_theme_cancel_button">@color/colorAccent</item>
+    <item name="mfc_theme_ok_button">@color/colorAccent</item>
+    <item name="mfc_theme_create_folder_button">@color/verde</item>
 </style>
 ```
 
@@ -77,7 +81,7 @@ new MaterialFileChooser(Context, "Title")
 ```
 The MIT License (MIT)
 
-Copyright (c) 2017 Tiago Melo
+Copyright (c) 2018 Tiago Melo
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
