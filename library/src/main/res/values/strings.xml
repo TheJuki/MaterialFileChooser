@@ -6,4 +6,7 @@
     <string name="quantidade_itens_selecionados_plural">%d selected items (%s)</string>
     <string name="criar_pasta_edittext_hint">Type the folder name here</string>
     <string name="criar_pasta_title">Create a new folder</string>
+    <string name="nome_botao_voltar">Back</string>
+    <string name="nome_botao_home">Home</string>
+    <string name="nome_botao_pesquisar">Search</string>
 </resources>

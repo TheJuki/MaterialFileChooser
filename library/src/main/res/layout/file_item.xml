@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?attr/mfc_theme_background"
     android:orientation="vertical"
     android:paddingBottom="5dp"
     android:paddingTop="5dp">
@@ -9,7 +10,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center|left"
+        android:gravity="center|start"
         android:orientation="horizontal">
 
         <RelativeLayout
@@ -22,7 +23,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/pasta"
-                android:tint="?attr/mfc_theme_foreground_color" />
+                android:tint="?attr/mfc_theme_file_icon" />
 
             <ImageView
                 android:id="@+id/protecaoDoArquivo"
@@ -33,7 +34,7 @@
                 android:layout_marginBottom="2dp"
                 android:layout_marginEnd="2dp"
                 android:src="@drawable/cadeado"
-                android:tint="?attr/mfc_theme_information_color" />
+                android:tint="?attr/mfc_theme_file_flag" />
 
             <ImageView
                 android:id="@+id/pastaComItensSelecionados"
@@ -44,7 +45,7 @@
                 android:layout_marginEnd="2dp"
                 android:layout_marginTop="2dp"
                 android:src="@drawable/asterisco"
-                android:tint="#dfdf07" />
+                android:tint="?attr/mfc_theme_file_asterisk" />
         </RelativeLayout>
 
         <LinearLayout
@@ -52,15 +53,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:paddingLeft="5dp">
+            android:paddingStart="5dp">
 
             <TextView
                 android:id="@+id/nomeDoArquivo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center|left"
+                android:gravity="center|start"
                 android:text="Músicas"
-                android:textColor="?attr/mfc_theme_foreground_color"
+                android:textColor="?attr/mfc_theme_file_name"
                 android:textSize="16sp" />
 
             <LinearLayout
@@ -72,28 +73,28 @@
                     android:id="@+id/tamanhoDoArquivo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center|left"
+                    android:gravity="center|start"
                     android:text="2,3 KB"
-                    android:textColor="?attr/mfc_theme_information_color"
+                    android:textColor="?attr/mfc_theme_file_information"
                     android:textSize="12sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center|left"
+                    android:gravity="center|start"
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
                     android:text="|"
-                    android:textColor="?attr/mfc_theme_information_color"
+                    android:textColor="?attr/mfc_theme_file_information"
                     android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/dataDaUltimaModificacao"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center|left"
+                    android:gravity="center|start"
                     android:text="Há 3 dias atrás"
-                    android:textColor="?attr/mfc_theme_information_color"
+                    android:textColor="?attr/mfc_theme_file_information"
                     android:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>
@@ -101,14 +102,14 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:gravity="center|right"
-            android:paddingRight="5dp">
+            android:gravity="center|end"
+            android:paddingEnd="5dp">
 
             <android.support.v7.widget.AppCompatCheckBox
                 android:id="@+id/botaoSelecionarArquivo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:buttonTint="?attr/mfc_theme_foreground_color"
+                android:buttonTint="?attr/mfc_theme_checkbox"
                 android:checked="false" />
         </LinearLayout>
     </LinearLayout>
