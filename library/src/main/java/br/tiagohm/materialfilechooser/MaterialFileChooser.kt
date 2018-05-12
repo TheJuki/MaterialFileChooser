@@ -45,11 +45,23 @@ open class MaterialFileChooser(val context: Context,
     private val chooserTextWatcher = ChooserTextWatcher()
     private val chooserFileFilter = ChooserFileFilter()
     private val corDeFundo: Int by lazy {
-        theme.resolveAttribute(R.attr.mfc_theme_background_color, typedValue, true)
+        theme.resolveAttribute(R.attr.mfc_theme_background, typedValue, true)
         typedValue.data
     }
     private val corDeFrente: Int by lazy {
-        theme.resolveAttribute(R.attr.mfc_theme_foreground_color, typedValue, true)
+        theme.resolveAttribute(R.attr.mfc_theme_foreground, typedValue, true)
+        typedValue.data
+    }
+    private val corDoTitulo: Int by lazy {
+        theme.resolveAttribute(R.attr.mfc_theme_title, typedValue, true)
+        typedValue.data
+    }
+    private val corDoBotaoCancelar: Int by lazy {
+        theme.resolveAttribute(R.attr.mfc_theme_cancel_button, typedValue, true)
+        typedValue.data
+    }
+    private val corDoBotaoOK: Int by lazy {
+        theme.resolveAttribute(R.attr.mfc_theme_ok_button, typedValue, true)
         typedValue.data
     }
     
@@ -409,12 +421,12 @@ open class MaterialFileChooser(val context: Context,
             mBotaoCriarPasta.setOnClickListener {
                 MaterialDialog.Builder(context)
                         .title(R.string.criar_pasta_title)
-                        .titleColor(corDeFrente)
+                        .titleColor(corDoTitulo)
                         .inputRangeRes(1, -1, R.color.criar_pasta_input_out_range)
                         .inputType(InputType.TYPE_CLASS_TEXT)
                         .negativeText(android.R.string.cancel)
-                        .negativeColor(corDeFrente)
-                        .positiveColor(corDeFrente)
+                        .negativeColor(corDoBotaoCancelar)
+                        .positiveColor(corDoBotaoOK)
                         .backgroundColor(corDeFundo)
                         .input(R.string.criar_pasta_edittext_hint, 0, false, { _, input ->
                             val novaPasta = File(pastaAtual, input.toString())
