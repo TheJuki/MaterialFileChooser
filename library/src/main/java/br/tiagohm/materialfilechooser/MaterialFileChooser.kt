@@ -374,6 +374,7 @@ open class MaterialFileChooser(val context: Context,
                     })
                 }
             }
+            listaDeArquivosEPastasAdapter.mapEmpty(R.layout.dialog_empty_folder)
             //Atualizar.
             mSwipeRefreshLayout.setOnRefreshListener {
                 carregarPastaAtual()
