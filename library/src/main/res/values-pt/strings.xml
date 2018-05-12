@@ -6,4 +6,7 @@
     <string name="quantidade_itens_selecionados_plural">%d itens selecionados (%s)</string>
     <string name="criar_pasta_edittext_hint">Digite o nome da pasta aqui</string>
     <string name="criar_pasta_title">Criar uma nova pasta</string>
+    <string name="nome_botao_voltar">Voltar</string>
+    <string name="nome_botao_home">Início</string>
+    <string name="nome_botao_pesquisar">Pesquisar</string>
 </resources>

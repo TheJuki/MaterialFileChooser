@@ -37,16 +37,31 @@
         android:layout_below="@id/caminhoDoDiretorio"
         android:gravity="center|top">
 
-        <ImageView
-            android:id="@+id/botaoVoltar"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="46dp"
             android:layout_margin="10dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:padding="4dp"
-            android:src="@drawable/esquerda"
-            android:tint="?attr/mfc_theme_toolbox" />
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/botaoVoltar"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:padding="4dp"
+                android:src="@drawable/esquerda"
+                android:tint="?attr/mfc_theme_toolbox" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/nome_botao_voltar"
+                android:textColor="?attr/mfc_theme_toolbox"
+                android:textSize="11sp" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -71,7 +86,7 @@
                 android:gravity="center"
                 android:text="274,4 KB"
                 android:textColor="?attr/mfc_theme_toolbox"
-                android:textSize="12sp" />
+                android:textSize="11sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -97,7 +112,7 @@
                 android:gravity="center"
                 android:text="10"
                 android:textColor="?attr/mfc_theme_toolbox"
-                android:textSize="12sp" />
+                android:textSize="11sp" />
         </LinearLayout>
 
         <ImageView
@@ -112,27 +127,57 @@
             android:tint="?attr/mfc_theme_toolbox"
             android:visibility="gone" />
 
-        <ImageView
-            android:id="@+id/irParaDiretorioInicial"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="46dp"
             android:layout_margin="10dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:padding="4dp"
-            android:src="@drawable/home"
-            android:tint="?attr/mfc_theme_toolbox" />
+            android:gravity="center"
+            android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/botaoBuscar"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            <ImageView
+                android:id="@+id/irParaDiretorioInicial"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:padding="4dp"
+                android:src="@drawable/home"
+                android:tint="?attr/mfc_theme_toolbox" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/nome_botao_home"
+                android:textColor="?attr/mfc_theme_toolbox"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="46dp"
             android:layout_margin="10dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:padding="4dp"
-            android:src="@drawable/busca"
-            android:tint="?attr/mfc_theme_toolbox" />
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/botaoBuscar"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:padding="4dp"
+                android:src="@drawable/busca"
+                android:tint="?attr/mfc_theme_toolbox" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/nome_botao_pesquisar"
+                android:textColor="?attr/mfc_theme_toolbox"
+                android:textSize="11sp" />
+        </LinearLayout>
     </LinearLayout>
 
     <FrameLayout
