@@ -13,17 +13,10 @@ val File.size: Long
     get() {
         return if (this.isFolder) {
             var sizeInBytes = 0L
-            //percorre todos os arquivos e pastas.
+            // Scroll through all files and folders.
             this.listFiles()?.forEach {
-                //Soma só com o tamanho dos arquivos.
-                sizeInBytes += if (it.isFile) {
-                    it.length()
-                } else {
-                    //Recursivo
-                    //it.size
-                    //Não recursivo
-                    0
-                }
+                // Only add the the file size
+                sizeInBytes += if (it.isFile) it.length() else 0
             }
             sizeInBytes
         } else {

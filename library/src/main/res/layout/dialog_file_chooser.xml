@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="UseCompoundDrawables"
     android:id="@+id/materialFileChooserLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,22 +10,23 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/titulo"
+        android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center|start"
         android:paddingBottom="10dp"
         android:paddingStart="24dp"
+        android:paddingEnd="24dp"
         android:paddingTop="15dp"
-        android:text="Título"
+        tools:text="Title"
         android:textColor="?attr/mfc_theme_title"
         android:textSize="20sp" />
 
     <br.tiagohm.breadcrumbview.BreadCrumbView
-        android:id="@+id/caminhoDoDiretorio"
+        android:id="@+id/directoryPath"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_below="@id/titulo"
+        android:layout_below="@id/title"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
         android:background="?attr/mfc_theme_background"
@@ -31,10 +34,10 @@
         app:bcv_textColor="?attr/mfc_theme_breadcrumb" />
 
     <LinearLayout
-        android:id="@+id/barraMenuSuperior"
+        android:id="@+id/topMenuBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/caminhoDoDiretorio"
+        android:layout_below="@id/directoryPath"
         android:gravity="center|top">
 
         <LinearLayout
@@ -45,22 +48,24 @@
             android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/botaoVoltar"
+                android:id="@+id/backButton"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
+                android:focusable="true"
                 android:padding="4dp"
-                android:src="@drawable/esquerda"
-                android:tint="?attr/mfc_theme_toolbox" />
+                android:src="@drawable/left_arrow"
+                android:tint="?attr/mfc_theme_toolbox"
+                android:contentDescription="@string/back" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@string/nome_botao_voltar"
+                android:text="@string/back_button"
                 android:textColor="?attr/mfc_theme_toolbox"
-                android:textSize="11sp" />
+                android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -75,18 +80,20 @@
                 android:layout_height="32dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
+                android:focusable="true"
                 android:padding="4dp"
-                android:src="@drawable/tamanho"
-                android:tint="?attr/mfc_theme_toolbox" />
+                android:src="@drawable/size"
+                android:tint="?attr/mfc_theme_toolbox"
+                android:contentDescription="@string/size" />
 
             <TextView
-                android:id="@+id/tamanhoTotal"
+                android:id="@+id/totalSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="274,4 KB"
+                tools:text="274,4 KB"
                 android:textColor="?attr/mfc_theme_toolbox"
-                android:textSize="11sp" />
+                android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -101,30 +108,34 @@
                 android:layout_height="32dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
+                android:focusable="true"
                 android:padding="4dp"
                 android:src="@drawable/items"
+                android:contentDescription="@string/items"
                 android:tint="?attr/mfc_theme_toolbox" />
 
             <TextView
-                android:id="@+id/quantidadeDeItens"
+                android:id="@+id/numberOfItems"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="10"
+                tools:text="10"
                 android:textColor="?attr/mfc_theme_toolbox"
-                android:textSize="11sp" />
+                android:textSize="12sp" />
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/botaoProsseguir"
+            android:id="@+id/proceedButton"
             android:layout_width="38dp"
             android:layout_height="38dp"
             android:layout_margin="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
+            android:focusable="true"
             android:padding="4dp"
-            android:src="@drawable/direita"
+            android:src="@drawable/right_arrow"
             android:tint="?attr/mfc_theme_toolbox"
+            android:contentDescription="@string/items"
             android:visibility="gone" />
 
         <LinearLayout
@@ -135,22 +146,24 @@
             android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/irParaDiretorioInicial"
+                android:id="@+id/goHomeButton"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
+                android:focusable="true"
                 android:padding="4dp"
                 android:src="@drawable/home"
+                android:contentDescription="@string/home"
                 android:tint="?attr/mfc_theme_toolbox" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@string/nome_botao_home"
+                android:text="@string/home_button"
                 android:textColor="?attr/mfc_theme_toolbox"
-                android:textSize="11sp" />
+                android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -161,36 +174,38 @@
             android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/botaoBuscar"
+                android:id="@+id/searchButton"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
+                android:focusable="true"
                 android:padding="4dp"
-                android:src="@drawable/busca"
+                android:src="@drawable/search"
+                android:contentDescription="@string/search_hint"
                 android:tint="?attr/mfc_theme_toolbox" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@string/nome_botao_pesquisar"
+                android:text="@string/search_hint"
                 android:textColor="?attr/mfc_theme_toolbox"
-                android:textSize="11sp" />
+                android:textSize="12sp" />
         </LinearLayout>
     </LinearLayout>
 
     <FrameLayout
-        android:id="@+id/campoDeBuscaBox"
+        android:id="@+id/searchBoxFrame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/barraMenuSuperior"
+        android:layout_below="@id/topMenuBar"
         android:layout_marginEnd="15dp"
         android:layout_marginStart="25dp"
         android:visibility="gone">
 
         <EditText
-            android:id="@+id/campoDeBusca"
+            android:id="@+id/searchField"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:background="?attr/mfc_theme_background"
@@ -202,29 +217,30 @@
     </FrameLayout>
 
     <LinearLayout
-        android:id="@+id/quantidadeDeItensSelecionadosBox"
+        android:id="@+id/numberOfSelectedItemsFrame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/campoDeBuscaBox"
+        android:layout_below="@id/searchBoxFrame"
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/quantidadeDeItensSelecionados"
+            android:id="@+id/numberOfSelectedItems"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
             android:paddingBottom="5dp"
             android:paddingTop="5dp"
-            android:text="3 itens selecionados"
+            tools:text="3 items selected"
             android:textColor="?attr/mfc_theme_status" />
 
         <android.support.v7.widget.AppCompatCheckBox
-            android:id="@+id/botaoSelecionarTudo"
+            android:id="@+id/selectAllCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:buttonTint="?attr/mfc_theme_checkbox"
+            app:buttonTint="?attr/mfc_theme_checkbox"
             android:checked="false"
+            android:paddingStart="5dp"
             android:paddingEnd="5dp" />
     </LinearLayout>
 
@@ -232,10 +248,10 @@
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/quantidadeDeItensSelecionadosBox">
+        android:layout_below="@id/numberOfSelectedItemsFrame">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/listaDeArquivosEPastas"
+            android:id="@+id/filesRecylerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
@@ -244,13 +260,13 @@
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/criarPasta"
+        android:id="@+id/createFolderFAB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="16dp"
-        android:src="@drawable/nova_pasta"
+        android:src="@drawable/new_folder"
         android:tint="?attr/mfc_theme_background"
         app:backgroundTint="?attr/mfc_theme_create_folder_button"
         app:elevation="0dp"

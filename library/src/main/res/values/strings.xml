@@ -1,12 +1,18 @@
 <resources>
     <string name="app_name" translatable="false">MaterialFileChooser</string>
-    <string name="quantidade_itens_pasta_singular">%d item</string>
-    <string name="quantidade_itens_pasta_plural">%d items</string>
-    <string name="quantidade_itens_selecionados_singular">%d selected item (%s)</string>
-    <string name="quantidade_itens_selecionados_plural">%d selected items (%s)</string>
-    <string name="criar_pasta_edittext_hint">Type the folder name here</string>
-    <string name="criar_pasta_title">Create a new folder</string>
-    <string name="nome_botao_voltar">Back</string>
-    <string name="nome_botao_home">Home</string>
-    <string name="nome_botao_pesquisar">Search</string>
+    <string name="number_of_items_singular">%d item</string>
+    <string name="number_of_items_plural">%d items</string>
+    <string name="number_of_selected_items_singular">%d selected item (%s)</string>
+    <string name="number_of_selected_items_plural">%d selected items (%s)</string>
+    <string name="create_folder_name_hint">Type the folder name here</string>
+    <string name="create_folder_title">Create a new folder</string>
+    <string name="back_button">Back</string>
+    <string name="home_button">Home</string>
+    <string name="search_hint">Search</string>
+    <string name="empty">Empty</string>
+    <string name="size">Size</string>
+    <string name="items">Items</string>
+    <string name="home">Home</string>
+    <string name="back">Back</string>
+    <string name="icon">Icon</string>
 </resources>

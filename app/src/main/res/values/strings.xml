@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MaterialFileChooser</string>
+    <string name="open_file_chooser">Open File Chooser</string>
 </resources>

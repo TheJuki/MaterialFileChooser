@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="quantidade_itens_pasta_singular">%d item</string>
-    <string name="quantidade_itens_pasta_plural">%d itens</string>
-    <string name="quantidade_itens_selecionados_singular">%d item selecionado (%s)</string>
-    <string name="quantidade_itens_selecionados_plural">%d itens selecionados (%s)</string>
-    <string name="criar_pasta_edittext_hint">Digite o nome da pasta aqui</string>
-    <string name="criar_pasta_title">Criar uma nova pasta</string>
-    <string name="nome_botao_voltar">Voltar</string>
-    <string name="nome_botao_home">Início</string>
-    <string name="nome_botao_pesquisar">Pesquisar</string>
+    <string name="number_of_items_singular">%d item</string>
+    <string name="number_of_items_plural">%d itens</string>
+    <string name="number_of_selected_items_singular">%d item selecionado (%s)</string>
+    <string name="number_of_selected_items_plural">%d itens selecionados (%s)</string>
+    <string name="create_folder_name_hint">Digite o nome da pasta aqui</string>
+    <string name="create_folder_title">Criar uma nova pasta</string>
+    <string name="back_button">Voltar</string>
+    <string name="home_button">Início</string>
+    <string name="search_hint">Pesquisar</string>
 </resources>

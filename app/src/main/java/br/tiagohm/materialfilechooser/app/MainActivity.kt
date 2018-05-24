@@ -10,23 +10,26 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import br.tiagohm.materialfilechooser.MaterialFileChooser
 import br.tiagohm.materialfilechooser.Sorter
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        
-        if (ContextCompat.checkSelfPermission(this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    1234)
-        } else {
-            showMaterialFileChooser()
+
+        openFileChooserButton.setOnClickListener {
+            if (ContextCompat.checkSelfPermission(this,
+                            Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                        1234)
+            } else {
+                showMaterialFileChooser()
+            }
         }
     }
-    
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             1234 -> {
@@ -52,7 +55,7 @@ class MainActivity : AppCompatActivity() {
                 showHiddenFiles = false,
                 initialFolder = Environment.getRootDirectory(),
                 restoreFolder = false)
-                .title("Selecione um arquivo")
+                .title("Choose a file")
                 .sorter(Sorter.ByNewestModification)
                 .onSelectedFilesListener {
                     Toast.makeText(this, it.toString(), Toast.LENGTH_SHORT).show()

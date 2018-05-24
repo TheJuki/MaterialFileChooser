@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/mfc_theme_background"
@@ -11,7 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center|start"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:baselineAligned="false">
 
         <RelativeLayout
             android:layout_width="36dp"
@@ -19,32 +22,35 @@
             android:layout_margin="10dp">
 
             <ImageView
-                android:id="@+id/iconeDoArquivo"
+                android:id="@+id/fileIcon"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/pasta"
+                android:src="@drawable/folder"
+                android:contentDescription="@string/icon"
                 android:tint="?attr/mfc_theme_file_icon" />
 
             <ImageView
-                android:id="@+id/protecaoDoArquivo"
+                android:id="@+id/fileProtection"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
                 android:layout_marginBottom="2dp"
                 android:layout_marginEnd="2dp"
-                android:src="@drawable/cadeado"
+                android:src="@drawable/padlock"
+                tools:ignore="ContentDescription"
                 android:tint="?attr/mfc_theme_file_flag" />
 
             <ImageView
-                android:id="@+id/pastaComItensSelecionados"
+                android:id="@+id/folderWithSelectedItems"
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true"
                 android:layout_marginEnd="2dp"
                 android:layout_marginTop="2dp"
-                android:src="@drawable/asterisco"
+                android:src="@drawable/asterisk"
+                tools:ignore="ContentDescription"
                 android:tint="?attr/mfc_theme_file_asterisk" />
         </RelativeLayout>
 
@@ -53,14 +59,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
+            android:paddingEnd="5dp"
             android:paddingStart="5dp">
 
             <TextView
-                android:id="@+id/nomeDoArquivo"
+                android:id="@+id/fileName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center|start"
-                android:text="Músicas"
+                tools:text="File Name"
                 android:textColor="?attr/mfc_theme_file_name"
                 android:textSize="16sp" />
 
@@ -70,11 +77,11 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/tamanhoDoArquivo"
+                    android:id="@+id/fileSize"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center|start"
-                    android:text="2,3 KB"
+                    tools:text="2,3 KB"
                     android:textColor="?attr/mfc_theme_file_information"
                     android:textSize="12sp" />
 
@@ -84,16 +91,16 @@
                     android:gravity="center|start"
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
-                    android:text="|"
+                    tools:text="|"
                     android:textColor="?attr/mfc_theme_file_information"
                     android:textSize="14sp" />
 
                 <TextView
-                    android:id="@+id/dataDaUltimaModificacao"
+                    android:id="@+id/lastModificationDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center|start"
-                    android:text="Há 3 dias atrás"
+                    tools:text="3 days ago"
                     android:textColor="?attr/mfc_theme_file_information"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -103,13 +110,14 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center|end"
+            android:paddingStart="5dp"
             android:paddingEnd="5dp">
 
             <android.support.v7.widget.AppCompatCheckBox
-                android:id="@+id/botaoSelecionarArquivo"
+                android:id="@+id/selectFileCheckBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:buttonTint="?attr/mfc_theme_checkbox"
+                app:buttonTint="?attr/mfc_theme_checkbox"
                 android:checked="false" />
         </LinearLayout>
     </LinearLayout>

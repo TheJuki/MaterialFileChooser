@@ -7,7 +7,9 @@ import android.support.design.widget.FloatingActionButton
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.text.*
+import android.text.Editable
+import android.text.InputType
+import android.text.TextWatcher
 import android.util.TypedValue
 import android.view.View
 import android.widget.*
@@ -34,191 +36,180 @@ open class MaterialFileChooser(val context: Context,
                                val showFolders: Boolean = true,
                                val allowBrowsing: Boolean = true,
                                val restoreFolder: Boolean = true) {
-    
-    //Constantes.
+
     private val typedValue = TypedValue()
     private val theme = context.theme
-    private val listaDeArquivosEPastasAdapter = EasyAdapter()
-    private val pilhaDeCaminhos = LinkedList<File>()
-    private val selecionarTudoStatus = ConcurrentHashMap<File, Boolean>()
+    private val listOfFilesAndFoldersAdapter = EasyAdapter()
+    private val folders = LinkedList<File>()
+    private val fileSelectionStatus = ConcurrentHashMap<File, Boolean>()
     private val filters = ArrayList<Filter>()
     private val chooserTextWatcher = ChooserTextWatcher()
     private val chooserFileFilter = ChooserFileFilter()
-    private val corDeFundo: Int by lazy {
+    private val backgroundColorInt: Int by lazy {
         theme.resolveAttribute(R.attr.mfc_theme_background, typedValue, true)
         typedValue.data
     }
-    private val corDeFrente: Int by lazy {
+    private val foregroundColorInt: Int by lazy {
         theme.resolveAttribute(R.attr.mfc_theme_foreground, typedValue, true)
         typedValue.data
     }
-    private val corDoTitulo: Int by lazy {
+    private val titleColorInt: Int by lazy {
         theme.resolveAttribute(R.attr.mfc_theme_title, typedValue, true)
         typedValue.data
     }
-    private val corDoBotaoCancelar: Int by lazy {
+    private val cancelButtonColorInt: Int by lazy {
         theme.resolveAttribute(R.attr.mfc_theme_cancel_button, typedValue, true)
         typedValue.data
     }
-    private val corDoBotaoOK: Int by lazy {
+    private val okButtonColorInt: Int by lazy {
         theme.resolveAttribute(R.attr.mfc_theme_ok_button, typedValue, true)
         typedValue.data
     }
-    
-    //Variáveis.
-    private var titulo: CharSequence? = ""
-    private val arquivosSelecionados: MutableSet<File> = Collections.newSetFromMap(ConcurrentHashMap<File, Boolean>())
-    private var arquivoAnteriormenteSelecionadoCb: CheckBox? = null
-    private var arquivoAnteriormenteSelecionado: File? = null
-    private lateinit var pastaAtual: File
-    private var ordenacao: Sorter = Sorter.ByNameInAscendingOrder
-    private lateinit var janela: DialogBuilder
-    private var textDaBusca = ""
-    private var arquivosAtuais: List<File> = Collections.emptyList()
-    private var tamanhoTotalDosArquivosSelecionados = 0L
+
+    private var title: CharSequence? = ""
+    private val filesSelected: MutableSet<File> = Collections.newSetFromMap(ConcurrentHashMap<File, Boolean>())
+    private var filePreviouslySelectedCb: CheckBox? = null
+    private var fileSelected: File? = null
+    private lateinit var currentFolder: File
+    private var orderSorter: Sorter = Sorter.ByNameInAscendingOrder
+    private lateinit var dialogWindow: DialogBuilder
+    private var textSearch = ""
+    private var currentFiles: List<File> = Collections.emptyList()
+    private var selectedFilesTotalSize = 0L
     private var onSelectedFilesListener: (files: List<File>) -> Unit = {}
     
     init {
-        //Pasta inicial padrão.
-        definirPastaInicial(ChooserSharedPreference.getPreviouslySelectedDiretory(context, restoreFolder, initialFolder))
+        // Default home folder
+        setHomeFolder(ChooserSharedPreference.getPreviouslySelectedDirectory(context, restoreFolder, initialFolder))
     }
-    
-    /**
-     * Define o título da janela.
-     */
+
+    /** Sets the title of the [dialogWindow] */
     fun title(title: CharSequence?): MaterialFileChooser {
-        titulo = title
+        this.title = title
         return this
     }
-    
-    /**
-     * Define o título da janela.
-     */
+
+    /** Sets the title of the [dialogWindow] using a string resource */
     fun title(@StringRes resId: Int): MaterialFileChooser {
         return title(context.getText(resId))
     }
-    
-    /**
-     * Define o método de ordenação da listagem de arquivos e pastas.
-     */
+
+    /** Sets the sort method of listing files and folders. */
     fun sorter(sorter: Sorter): MaterialFileChooser {
-        ordenacao = sorter
+        orderSorter = sorter
         return this
     }
-    
+
+    /** Sets the selected files listener which is called when the dialog is onPositive dismissed */
     fun onSelectedFilesListener(listener: (files: List<File>) -> Unit): MaterialFileChooser {
         onSelectedFilesListener = listener
         return this
     }
-    
-    private fun definirPastaInicial(folder: File): MaterialFileChooser {
+
+    private fun setHomeFolder(folder: File): MaterialFileChooser {
         initialFolder = folder
-        pastaAtual = folder
-        //Limpa a pilha
-        pilhaDeCaminhos.clear()
-        //Insere na pilha.
-        pilhaDeCaminhos.addFirst(pastaAtual)
-        //Estado desta pasta.
-        selecionarTudoStatus[pastaAtual] = false
+        currentFolder = folder
+        // Clear folders
+        folders.clear()
+        // Insert current folder
+        folders.addFirst(currentFolder)
+        // Current folder is not selected
+        fileSelectionStatus[currentFolder] = false
         return this
     }
-    
-    private fun exibirBreadCrumbView(file: File) {
+
+    private fun displayBreadCrumbView(file: File) {
         var mfile = file
-        //Limpa.
-        janela.mCaminhoDoDiretorio.itens.clear()
-        //Verifica se não é uma pasta.
+        // Clear crumbs
+        dialogWindow.mBreadCrumbDirectory.itens.clear()
+        // Checks if it is not a folder
         if (!mfile.isFolder) {
             mfile = mfile.parentFile
         }
-        //Obtém a pasta-pai.
+        // Gets the parent folder
         val parent = mfile.parentFile
-        //Não tem pasta-pai.
+        // There is no parent folder
         if (parent == null) {
             val item = RootFileBreadCrumbItem(mfile)
-            janela.mCaminhoDoDiretorio.addItem(item)
+            dialogWindow.mBreadCrumbDirectory.addItem(item)
         }
-        //Tem pasta-pai.
+        // There is a parent folder
         else {
-            exibirBreadCrumbView(parent)
+            displayBreadCrumbView(parent)
             val item = FileBreadCrumbItem(mfile)
-            janela.mCaminhoDoDiretorio.addItem(item)
+            dialogWindow.mBreadCrumbDirectory.addItem(item)
         }
     }
-    
-    private fun selecionarArquivo(buttonView: CompoundButton?, file: File, selecionar: Boolean) {
-        //Checkbox selecionado.
-        if (selecionar) {
-            //Não é multi-selecionável e tem um arquivo selecionado.
-            if (!allowMultipleFiles && arquivoAnteriormenteSelecionadoCb != null) {
-                val cb = arquivoAnteriormenteSelecionadoCb!!
-                arquivoAnteriormenteSelecionadoCb = null
-                //Dois arquivos que estão na mesma pasta.
-                if (buttonView !== cb && file.parent == arquivoAnteriormenteSelecionado?.parent) {
-                    //Desmarca o que está selecionado.
+
+    private fun selectFile(buttonView: CompoundButton?, file: File, isSelected: Boolean) {
+        // Checkbox is selected
+        if (isSelected) {
+            // It is not multi-selectable and has a selected file
+            if (!allowMultipleFiles && filePreviouslySelectedCb != null) {
+                val cb = filePreviouslySelectedCb!!
+                filePreviouslySelectedCb = null
+                // Two files are in the same folder
+                if (buttonView !== cb && file.parent == fileSelected?.parent) {
+                    // Uncheck what is selected
                     cb.isChecked = false
                 } else {
-                    //Remove o que está selecionado.
-                    arquivosSelecionados.remove(arquivoAnteriormenteSelecionado)
-                    arquivoAnteriormenteSelecionado = null
+                    // Removes what is selected
+                    filesSelected.remove(fileSelected)
+                    fileSelected = null
                 }
             }
-            //Adiciona o arquivo.
-            if (!arquivosSelecionados.contains(file)) {
-                tamanhoTotalDosArquivosSelecionados += if (file.isFolder) 0 else file.length()
+            // Add the file
+            if (!filesSelected.contains(file)) {
+                selectedFilesTotalSize += if (file.isFolder) 0 else file.length()
             }
-            arquivosSelecionados.add(file)
+            filesSelected.add(file)
         } else {
-            //Remove o arquivo.
-            if (arquivosSelecionados.contains(file)) {
-                tamanhoTotalDosArquivosSelecionados -= if (file.isFolder) 0 else file.length()
+            // Remove the file
+            if (filesSelected.contains(file)) {
+                selectedFilesTotalSize -= if (file.isFolder) 0 else file.length()
             }
-            arquivosSelecionados.remove(file)
-            arquivoAnteriormenteSelecionado = null
+            filesSelected.remove(file)
+            fileSelected = null
         }
-        //Marca o arquivo que foi selecionado.
-        arquivoAnteriormenteSelecionadoCb = buttonView as CheckBox?
-        arquivoAnteriormenteSelecionado = file
-        //Atualiza o número de pastas selecionadas de acordo com a pluralidade.
-        janela.exibirQuantidadeDeItensSelecionados(tamanhoTotalDosArquivosSelecionados)
+        // Mark the file that was selected
+        filePreviouslySelectedCb = buttonView as CheckBox?
+        fileSelected = file
+        // Updates the number of selected folders according to the plurality
+        dialogWindow.displayNumberOfSelectedItems(selectedFilesTotalSize)
     }
     
     /**
-     * Vá para uma pasta específica.
+     * Go to a specific folder.
      */
     fun goTo(file: File) {
-        //Não permitir a navegação.
-        if (!allowBrowsing) {
-            //nada
-        }
-        //Navegar somente se for uma pasta.
-        else if (file.isFolder) {
-            pastaAtual = file
-            pilhaDeCaminhos.addFirst(pastaAtual)
-            //Ainda não navegou nesta pasta. O selecionar tudo está desabilitado.
-            if (allowMultipleFiles && !selecionarTudoStatus.containsKey(file)) {
-                selecionarTudoStatus[file] = false
+        // Navigate only if it is a folder
+        if (allowBrowsing && file.isFolder) {
+            currentFolder = file
+            folders.addFirst(currentFolder)
+            // You have not yet navigated this folder. Selecting everything is disabled.
+            if (allowMultipleFiles && !fileSelectionStatus.containsKey(file)) {
+                fileSelectionStatus[file] = false
             }
-            carregarPastaAtual()
-            //Define o estado do botão selecionar tudo.
-            janela.mSelecionarTudo.isChecked = allowMultipleFiles && selecionarTudoStatus[file]!!
+            loadCurrentFolder()
+            // Sets the state of the select all checkBox.
+            dialogWindow.mSelectAllCheckBox.isChecked = allowMultipleFiles && fileSelectionStatus[file]!!
         }
     }
     
     /**
-     * vá para a pasta inicial.
+     * Go to the initial folder
      */
     fun goToStart() {
         goTo(initialFolder)
     }
     
     private fun backTo(file: File): Boolean {
-        //Pode navegar e é uma pasta.
+        // Can browse and is a folder.
         return if (allowBrowsing && file.isFolder) {
-            pastaAtual = file
-            carregarPastaAtual()
-            //Define o estado do botão selecionar tudo.
-            janela.mSelecionarTudo.isChecked = allowMultipleFiles && selecionarTudoStatus[file] ?: false
+            currentFolder = file
+            loadCurrentFolder()
+            // Sets the state of the select all checkBox.
+            dialogWindow.mSelectAllCheckBox.isChecked = allowMultipleFiles && fileSelectionStatus[file] ?: false
             true
         } else {
             false
@@ -226,31 +217,31 @@ open class MaterialFileChooser(val context: Context,
     }
     
     /**
-     * Vá para a pasta anterior.
+     * Go to the previous folder.
      */
     fun back(): Boolean {
-        //Se pode navegar e há pasta pra navegar.
-        return if (allowBrowsing && pilhaDeCaminhos.size > 1) {
-            //Remove a pasta atual da pilha.
-            pilhaDeCaminhos.removeFirst()
-            //Retorna para a pasta anterior.
-            backTo(pilhaDeCaminhos.first)
+        // If you can navigate and there is folder to navigate.
+        return if (allowBrowsing && folders.size > 1) {
+            // Remove the current folder
+            folders.removeFirst()
+            // Return to the previous folder
+            backTo(folders.first)
         } else {
             false
         }
     }
     
     private fun compareFile(a: File, b: File): Int {
-        //Ordena por pastas primeiro.
+        // Sort by folders first
         return if (showFoldersFirst) {
             when {
-                a.isDirectory == b.isDirectory -> ordenacao.compare(a, b)
+                a.isDirectory == b.isDirectory -> orderSorter.compare(a, b)
                 a.isDirectory -> -1
                 else -> 1
             }
         } else {
             when {
-                a.isFile == b.isFile -> ordenacao.compare(a, b)
+                a.isFile == b.isFile -> orderSorter.compare(a, b)
                 a.isFile -> -1
                 else -> 1
             }
@@ -258,142 +249,144 @@ open class MaterialFileChooser(val context: Context,
     }
     
     private fun scanFiles(file: File): List<File> {
-        //Obtém a lista de arquivos.
+        // Get the list of files
         val fileList = file.listFiles(chooserFileFilter)?.toMutableList() ?: Collections.emptyList()
-        //Seta a quantidade de itens exibidos.
-        janela.mQuantidadeDeItens.text = fileList.size.toString()
-        //Orderná-la.
+        // Set the number of files displayed
+        dialogWindow.mNumberOfFiles.text = fileList.size.toString()
+        // Order file list
         fileList.sortWith(Comparator { a, b -> compareFile(a, b) })
         return fileList
     }
-    
-    private fun exibirRecyclerView(file: File) {
-        arquivosAtuais = scanFiles(file)
-        listaDeArquivosEPastasAdapter.setData(arquivosAtuais)
+
+    private fun displayRecyclerView(file: File) {
+        currentFiles = scanFiles(file)
+        listOfFilesAndFoldersAdapter.setData(currentFiles)
     }
-    
-    private fun carregarPastaAtual() {
-        exibirBreadCrumbView(pastaAtual)
-        exibirRecyclerView(pastaAtual)
-        janela.mTamanhoTotal.text = pastaAtual.sizeAsString
+
+    private fun loadCurrentFolder() {
+        displayBreadCrumbView(currentFolder)
+        displayRecyclerView(currentFolder)
+        dialogWindow.mSizeTotal.text = currentFolder.sizeAsString
     }
-    
-    /**
-     * Exibe a janela.
-     */
+
+    /** Display the [dialogWindow] */
     fun show() {
         DialogBuilder()
-        //Exibe a janela de diálogo.
-        janela.show()
+        dialogWindow.show()
     }
     
     private inner class DialogBuilder : MaterialDialog.Builder(context) {
-        
-        //Views da janela de dialogo.
-        val mTitulo: TextView by lazy { customView.findViewById<TextView>(R.id.titulo) }
-        val mCaminhoDoDiretorio: BreadCrumbView<File> by lazy { customView.findViewById<BreadCrumbView<File>>(R.id.caminhoDoDiretorio) }
-        val mListaDeArquivosEPastas: RecyclerView by lazy { customView.findViewById<RecyclerView>(R.id.listaDeArquivosEPastas) }
-        val mTamanhoTotal: TextView by lazy { customView.findViewById<TextView>(R.id.tamanhoTotal) }
-        val mQuantidadeDeItens: TextView by lazy { customView.findViewById<TextView>(R.id.quantidadeDeItens) }
-        val mBotaoVoltar: ImageView by lazy { customView.findViewById<ImageView>(R.id.botaoVoltar) }
-        val mIrParaDiretorioInicial: ImageView by lazy { customView.findViewById<ImageView>(R.id.irParaDiretorioInicial) }
-        val mQuantidadeDeItensSelecionados: TextView by lazy { customView.findViewById<TextView>(R.id.quantidadeDeItensSelecionados) }
-        val mBotaoBuscar: ImageView by lazy { customView.findViewById<ImageView>(R.id.botaoBuscar) }
-        val mCampoDeBusca: EditText by lazy { customView.findViewById<EditText>(R.id.campoDeBusca) }
-        val mCampoDeBuscaBox: View by lazy { customView.findViewById<View>(R.id.campoDeBuscaBox) }
+
+        /** Views in the [dialogWindow] */
+        val mTitle: TextView by lazy { customView.findViewById<TextView>(R.id.title) }
+        val mBreadCrumbDirectory: BreadCrumbView<File> by lazy { customView.findViewById<BreadCrumbView<File>>(R.id.directoryPath) }
+        val mListOfFiles: RecyclerView by lazy { customView.findViewById<RecyclerView>(R.id.filesRecylerView) }
+        val mSizeTotal: TextView by lazy { customView.findViewById<TextView>(R.id.totalSize) }
+        val mNumberOfFiles: TextView by lazy { customView.findViewById<TextView>(R.id.numberOfItems) }
+        val mBackButton: ImageView by lazy { customView.findViewById<ImageView>(R.id.backButton) }
+        val mHomeButton: ImageView by lazy { customView.findViewById<ImageView>(R.id.goHomeButton) }
+        val mNumberOfSelectedItems: TextView by lazy { customView.findViewById<TextView>(R.id.numberOfSelectedItems) }
+        val mSearchButton: ImageView by lazy { customView.findViewById<ImageView>(R.id.searchButton) }
+        val mSearchField: EditText by lazy { customView.findViewById<EditText>(R.id.searchField) }
+        val mSearchBoxFrame: View by lazy { customView.findViewById<View>(R.id.searchBoxFrame) }
         val mSwipeRefreshLayout: SwipeRefreshLayout by lazy { customView.findViewById<SwipeRefreshLayout>(R.id.swipeRefreshLayout) }
-        val mSelecionarTudo: CheckBox by lazy { customView.findViewById<CheckBox>(R.id.botaoSelecionarTudo) }
-        val mBotaoCriarPasta: FloatingActionButton by lazy { customView.findViewById<FloatingActionButton>(R.id.criarPasta) }
+        val mSelectAllCheckBox: CheckBox by lazy { customView.findViewById<CheckBox>(R.id.selectAllCheckBox) }
+        val mCreateFolderFAB: FloatingActionButton by lazy { customView.findViewById<FloatingActionButton>(R.id.createFolderFAB) }
         
         init {
-            janela = this
-            //Seta o layout.
+            dialogWindow = this
+            // Set layout
             customView(R.layout.dialog_file_chooser, false)
-            //Seta o título.
-            if (titulo.isNullOrEmpty()) mTitulo.visibility = View.GONE else mTitulo.text = titulo
-            //Botões.
+            // Set the title
+            if (this@MaterialFileChooser.title.isNullOrEmpty()) mTitle.visibility = View.GONE else mTitle.text = this@MaterialFileChooser.title
+            // Buttons
             positiveText(android.R.string.ok)
             negativeText(android.R.string.cancel)
-            //Tema.
-            backgroundColor(corDeFundo)
-            positiveColor(corDeFrente)
-            negativeColor(corDeFrente)
-            mSwipeRefreshLayout.setColorSchemeColors(corDeFrente)
-            //Comportamento.
+            // Theme
+            backgroundColor(backgroundColorInt)
+            positiveColor(foregroundColorInt)
+            negativeColor(foregroundColorInt)
+            mSwipeRefreshLayout.setColorSchemeColors(foregroundColorInt)
+            // Behavior
             cancelable(false)
             canceledOnTouchOutside(false)
             autoDismiss(false)
-            //Configura o RecyclerView.
-            mListaDeArquivosEPastas.layoutManager = LinearLayoutManager(context)
-            listaDeArquivosEPastasAdapter.map<File>(R.layout.file_item) { file, injector ->
-                //Seta o ícone do arquivo.
-                injector.image(R.id.iconeDoArquivo,
-                        if (file.isFolder) R.drawable.pasta else getIconByExtension(file))
-                //Seta o ícone de arquivo protegido.
-                injector.image(R.id.protecaoDoArquivo,
-                        if (file.isProtected) R.drawable.cadeado else 0)
-                //Seta o ícone de que contém arquivos selecionados.
-                injector.image(R.id.pastaComItensSelecionados,
-                        if (file.isFolder && constainsSelectedFiles(file)) R.drawable.asterisco else 0)
-                //Seta a opacidade se o arquivo é oculto.
-                injector.using<View>(R.id.iconeDoArquivo) { alpha = if (file.isHidden) 0.4f else 1f }
-                //Seta o texto com o nome do arquivo.
-                injector.text(R.id.nomeDoArquivo, file.name)
-                //Seta o tamanho do arquivo.
+            // Configure the RecyclerView.
+            mListOfFiles.layoutManager = LinearLayoutManager(context)
+            listOfFilesAndFoldersAdapter.map<File>(R.layout.file_item) { file, injector ->
+                // File or folder icon
+                injector.image(R.id.fileIcon,
+                        if (file.isFolder) R.drawable.folder else getIconByExtension(file))
+                // Protected icon
+                injector.image(R.id.fileProtection,
+                        if (file.isProtected) R.drawable.padlock else 0)
+                // Folder with selected items icon
+                injector.image(R.id.folderWithSelectedItems,
+                        if (file.isFolder && containsSelectedFiles(file)) R.drawable.asterisk else 0)
+                // Set opacity if the file is hidden
+                injector.using<View>(R.id.fileIcon) { alpha = if (file.isHidden) 0.4f else 1f }
+                // Set file name
+                injector.text(R.id.fileName, file.name)
+                // Set size of the file
                 if (file.isFile) {
-                    //Tamanho em bytes.
-                    injector.text(R.id.tamanhoDoArquivo, file.sizeAsString)
+                    // Size in bytes
+                    injector.text(R.id.fileSize, file.sizeAsString)
                 }
-                //Tamanho em quantidade de itens.
+                // Size of items
                 else {
-                    //Obtém a quantidade de itens.
+                    // Number of items
                     val itemCount = file.count(chooserFileFilter)
-                    //Formatação do texto de acordo com a pluralidade.
-                    val stringRes = if (itemCount > 1) R.string.quantidade_itens_pasta_plural else R.string.quantidade_itens_pasta_singular
-                    injector.text(R.id.tamanhoDoArquivo, context.getString(stringRes, itemCount))
+                    // Format item count with plurality
+                    val stringRes = if (itemCount > 1) R.string.number_of_items_plural else R.string.number_of_items_singular
+                    injector.text(R.id.fileSize, context.getString(stringRes, itemCount))
                 }
-                //Seta a data de modificação do arquivo.
-                injector.text(R.id.dataDaUltimaModificacao, file.lastModified)
-                //Permitir selecionar pastas.
-                injector.show(R.id.botaoSelecionarArquivo, allowSelectFolder || file.isFile)
-                //Eventos.
+                // Set last modified date
+                injector.text(R.id.lastModificationDate, file.lastModified)
+                // Allow selection of multiple files
+                injector.show(R.id.selectFileCheckBox, allowSelectFolder || file.isFile)
+                // Events
                 injector.click<View>(EasyAdapter.ROOT_VIEW) {
-                    //Vá para a pasta clicada.
-                    goTo(file)
+                    // Go to clicked folder
+                    if (file.isFolder) {
+                        goTo(file)
+                    } else {
+                        injector.using<CheckBox>(R.id.selectFileCheckBox) {
+                            selectFile(this, file, isChecked)
+                        }
+                    }
                 }
-                //Selecionei/Deselecionei um arquivo.
-                injector.using<CheckBox>(R.id.botaoSelecionarArquivo) {
+                // Select/un-select file
+                injector.using<CheckBox>(R.id.selectFileCheckBox) {
                     tag = file
-                    //Marcar checkbox se este é de um arquivo selecionado.
+                    // Check checkbox if this is from a selected file.
                     setOnCheckedChangeListener(null)
-                    isChecked = arquivosSelecionados.contains(file)
-                    //Evento.
+                    isChecked = filesSelected.contains(file)
                     setOnCheckedChangeListener({ buttonView, isChecked ->
-                        //Seleciona ou deseleciona o arquivo.
-                        selecionarArquivo(buttonView, file, isChecked)
+                        // Selects or deselects the file.
+                        selectFile(buttonView, file, isChecked)
                     })
                 }
             }
-            listaDeArquivosEPastasAdapter.mapEmpty(R.layout.dialog_empty_folder)
-            //Atualizar.
+            listOfFilesAndFoldersAdapter.mapEmpty(R.layout.dialog_empty_folder)
+            // Update folder
             mSwipeRefreshLayout.setOnRefreshListener {
-                carregarPastaAtual()
+                loadCurrentFolder()
                 mSwipeRefreshLayout.isRefreshing = false
             }
-            //Selecionar tudo.
-            mSelecionarTudo.setOnCheckedChangeListener { _, checked ->
-                //Seleciona ou não os arquivo da pasta atual.
-                selecionarTudoStatus[pastaAtual] = checked
-                arquivosAtuais.forEach {
+            // Select/Un-select all
+            mSelectAllCheckBox.setOnCheckedChangeListener { _, checked ->
+                // Select or un-select the current file
+                fileSelectionStatus[currentFolder] = checked
+                currentFiles.forEach {
                     if (allowSelectFolder || !it.isFolder) {
-                        selecionarArquivo(null, it, checked)
+                        selectFile(null, it, checked)
                     }
                 }
-                //Recarrega os itens exibidos.
-                carregarPastaAtual()
+                // Reload the displayed items
+                loadCurrentFolder()
             }
-            //Migalha.
-            mCaminhoDoDiretorio.setBreadCrumbListener(object : BreadCrumbView.BreadCrumbListener<File> {
+            // Crumbs
+            mBreadCrumbDirectory.setBreadCrumbListener(object : BreadCrumbView.BreadCrumbListener<File> {
                 override fun onItemClicked(breadCrumbView: BreadCrumbView<File>, breadCrumbItem: BreadCrumbItem<File>, i: Int) {
                     goTo(breadCrumbItem.selectedItem)
                 }
@@ -402,91 +395,86 @@ open class MaterialFileChooser(val context: Context,
                     return false
                 }
             })
-            //Voltar para a pasta anterior.
-            mBotaoVoltar.setOnClickListener { back() }
-            //Voltar para o inicio.
-            mIrParaDiretorioInicial.setOnClickListener { goToStart() }
-            //Pesquisar.
-            mBotaoBuscar.setOnClickListener {
-                if (mCampoDeBuscaBox.visibility == View.VISIBLE) {
-                    mCampoDeBuscaBox.visibility = View.GONE
+            // Go back a folder
+            mBackButton.setOnClickListener { back() }
+            // Go home
+            mHomeButton.setOnClickListener { goToStart() }
+            // Search
+            mSearchButton.setOnClickListener {
+                if (mSearchBoxFrame.visibility == View.VISIBLE) {
+                    mSearchBoxFrame.visibility = View.GONE
                 } else {
-                    mCampoDeBuscaBox.visibility = View.VISIBLE
+                    mSearchBoxFrame.visibility = View.VISIBLE
                 }
             }
-            //Evento de pesquisa.
-            mCampoDeBusca.removeTextChangedListener(chooserTextWatcher)
-            mCampoDeBusca.addTextChangedListener(chooserTextWatcher)
-            listaDeArquivosEPastasAdapter.attachTo(mListaDeArquivosEPastas)
-            //Criar pasta.
-            mBotaoCriarPasta.setOnClickListener {
+            // Search events
+            mSearchField.removeTextChangedListener(chooserTextWatcher)
+            mSearchField.addTextChangedListener(chooserTextWatcher)
+            listOfFilesAndFoldersAdapter.attachTo(mListOfFiles)
+            // Create folder
+            mCreateFolderFAB.setOnClickListener {
                 MaterialDialog.Builder(context)
-                        .title(R.string.criar_pasta_title)
-                        .titleColor(corDoTitulo)
+                        .title(R.string.create_folder_title)
+                        .titleColor(titleColorInt)
                         .inputRangeRes(1, -1, R.color.criar_pasta_input_out_range)
                         .inputType(InputType.TYPE_CLASS_TEXT)
                         .negativeText(android.R.string.cancel)
-                        .negativeColor(corDoBotaoCancelar)
-                        .positiveColor(corDoBotaoOK)
-                        .backgroundColor(corDeFundo)
-                        .input(R.string.criar_pasta_edittext_hint, 0, false, { _, input ->
-                            val novaPasta = File(pastaAtual, input.toString())
+                        .negativeColor(cancelButtonColorInt)
+                        .positiveColor(okButtonColorInt)
+                        .backgroundColor(backgroundColorInt)
+                        .input(R.string.create_folder_name_hint, 0, false, { _, input ->
+                            val novaPasta = File(currentFolder, input.toString())
                             try {
                                 if (!novaPasta.mkdir()) {
                                     Toast.makeText(context, "error", Toast.LENGTH_SHORT).show()
                                 } else {
-                                    carregarPastaAtual()
+                                    loadCurrentFolder()
                                 }
                             } catch (e: Exception) {
                                 Toast.makeText(context, "error: " + e.message, Toast.LENGTH_SHORT).show()
                             }
                         }).show()
             }
-            //Eventos.
             onPositive { dialog, _ ->
-                //Selecionou a quantidade mínima de arquivos.
-                if (arquivosSelecionados.size in minSelectedFiles..maxSelectedFiles) {
-                    onSelectedFilesListener(arquivosSelecionados.toList())
-                    //Fecha a janela.
+                // User has selected the minimum amount of files.
+                if (filesSelected.size in minSelectedFiles..maxSelectedFiles) {
+                    onSelectedFilesListener(filesSelected.toList())
+                    // Close dialog window
                     dialog.dismiss()
                 }
                 
             }
             onNegative { dialog, _ ->
-                //Selecionou a quantidade mínima de arquivos.
-                if (arquivosSelecionados.size in minSelectedFiles..maxSelectedFiles) {
-                    //Fecha a janela.
-                    dialog.dismiss()
-                }
+                dialog.dismiss()
             }
             dismissListener {
-                //Salva a pasta atual se está permitido restaurar pastas.
+                // Saves the current folder if it is allowed to restore folders.
                 if (restoreFolder) {
-                    ChooserSharedPreference.setPreviouslySelectedDiretory(context, pastaAtual)
+                    ChooserSharedPreference.setPreviouslySelectedDirectory(context, currentFolder)
                 }
             }
-            //Permite seleção multipla.
-            mSelecionarTudo.visibility = if (allowMultipleFiles) View.VISIBLE else View.GONE
-            //Permitir criar pasta.
-            janela.mBotaoCriarPasta.visibility = if (allowCreateFolder) View.VISIBLE else View.GONE
-            //Inicio.
-            exibirQuantidadeDeItensSelecionados(0)
-            carregarPastaAtual()
+            // Allows for multiple selection
+            mSelectAllCheckBox.visibility = if (allowMultipleFiles) View.VISIBLE else View.GONE
+            // Allow creating folders
+            dialogWindow.mCreateFolderFAB.visibility = if (allowCreateFolder) View.VISIBLE else View.GONE
+            // Start
+            displayNumberOfSelectedItems(0)
+            loadCurrentFolder()
         }
-        
-        fun exibirQuantidadeDeItensSelecionados(tamanho: Long) {
-            //Atualiza o número de pastas selecionadas de acordo com a pluralidade.
-            if (arquivosSelecionados.size > 1) {
-                janela.mQuantidadeDeItensSelecionados.text =
-                        context.getString(R.string.quantidade_itens_selecionados_plural, arquivosSelecionados.size, tamanho.toSizeString())
+
+        fun displayNumberOfSelectedItems(size: Long) {
+            // Updates the number of selected folders according to the plurality.
+            if (filesSelected.size > 1) {
+                dialogWindow.mNumberOfSelectedItems.text =
+                        context.getString(R.string.number_of_selected_items_plural, filesSelected.size, size.toSizeString())
             } else {
-                janela.mQuantidadeDeItensSelecionados.text =
-                        context.getString(R.string.quantidade_itens_selecionados_singular, arquivosSelecionados.size, tamanho.toSizeString())
+                dialogWindow.mNumberOfSelectedItems.text =
+                        context.getString(R.string.number_of_selected_items_singular, filesSelected.size, size.toSizeString())
             }
         }
-        
-        private fun constainsSelectedFiles(parent: File): Boolean {
-            for (file in arquivosSelecionados) {
+
+        private fun containsSelectedFiles(parent: File): Boolean {
+            for (file in filesSelected) {
                 if (file.absolutePath != parent.absolutePath &&
                         file.absolutePath.startsWith(parent.absolutePath)) {
                     return true
@@ -498,7 +486,7 @@ open class MaterialFileChooser(val context: Context,
         private fun getIconByExtension(file: File): Int {
             return when (file.extension) {
                 "mp4" -> R.drawable.video
-                "c", "cpp", "cs", "js", "h", "java", "kt", "php", "xml" -> R.drawable.codigo
+                "c", "cpp", "cs", "js", "h", "java", "kt", "php", "xml" -> R.drawable.code
                 "avi" -> R.drawable.avi
                 "doc" -> R.drawable.doc
                 "flv" -> R.drawable.flv
@@ -508,7 +496,7 @@ open class MaterialFileChooser(val context: Context,
                 "mp3" -> R.drawable.mp3
                 "pdf" -> R.drawable.pdf
                 "txt" -> R.drawable.txt
-                else -> R.drawable.arquivo
+                else -> R.drawable.file
             }
         }
     }
@@ -517,29 +505,29 @@ open class MaterialFileChooser(val context: Context,
         
         private const val NAME = "materialfilechooser_prefs"
         private const val PREVIOUS_SELECTED_FOLDER = "prev_selected_folder"
-        
-        fun getPreviouslySelectedDiretory(context: Context, restoreFolder: Boolean, initialFolder: File): File {
+
+        fun getPreviouslySelectedDirectory(context: Context, restoreFolder: Boolean, initialFolder: File): File {
             if (!restoreFolder) return initialFolder
             val path = context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
                     .getString(PREVIOUS_SELECTED_FOLDER, null)
             return if (path != null) File(path) else initialFolder
         }
-        
-        fun setPreviouslySelectedDiretory(context: Context, file: File) {
+
+        fun setPreviouslySelectedDirectory(context: Context, file: File) {
             context.getSharedPreferences(NAME, Context.MODE_PRIVATE)
                     .edit()
                     .putString(PREVIOUS_SELECTED_FOLDER, file.absolutePath)
                     .apply()
         }
     }
-    
-    //Item para a pasta raiz.
+
+    // Item for the root folder.
     private class RootFileBreadCrumbItem(file: File) : FileBreadCrumbItem(file) {
         
         override fun getText() = "/"
     }
-    
-    //Item para uma pasta.
+
+    // Item for a folder.
     private open class FileBreadCrumbItem(file: File) : BreadCrumbItem<File>() {
         
         init {
@@ -548,25 +536,25 @@ open class MaterialFileChooser(val context: Context,
         
         override fun getText(): String? = selectedItem.name
     }
-    
-    //Filtro de arquivos.
+
+    // File filtering
     private inner class ChooserFileFilter : FileFilter {
         
         override fun accept(f: File): Boolean {
             val showHidden = showHiddenFiles || !f.isHidden
-            return (textDaBusca.isEmpty() || f.name.contains(textDaBusca, true)) &&
-                    //É um arquivo oculto e pode ser exibido.
+            return (textSearch.isEmpty() || f.name.contains(textSearch, true)) &&
+                    // It is a hidden file and can be displayed.
                     showHidden &&
-                    //Exibir arquivos e/ou pastas.
+                    // View files and / or folders.
                     (showFiles && f.isFile || showFolders && f.isFolder) &&
-                    //Filtros.
+                    // Filter
                     filter(f)
         }
         
         private fun filter(f: File): Boolean {
-            //Não há filtros.
+            // No filters
             if (filters.size == 0) return true
-            //Filtra.
+            // Filter
             for (filter in filters) {
                 if (filter.accept(f)) {
                     return true
@@ -579,8 +567,8 @@ open class MaterialFileChooser(val context: Context,
     private inner class ChooserTextWatcher : TextWatcher {
         
         override fun afterTextChanged(s: Editable) {
-            textDaBusca = s.toString().toLowerCase()
-            carregarPastaAtual()
+            textSearch = s.toString().toLowerCase()
+            loadCurrentFolder()
         }
         
         override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
