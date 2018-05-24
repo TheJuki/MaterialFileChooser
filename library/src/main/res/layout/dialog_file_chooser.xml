@@ -241,7 +241,7 @@
             app:buttonTint="?attr/mfc_theme_checkbox"
             android:checked="false"
             android:paddingStart="5dp"
-            android:paddingEnd="5dp" />
+            android:paddingEnd="0dp" />
     </LinearLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout

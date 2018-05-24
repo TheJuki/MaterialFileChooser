@@ -15,4 +15,6 @@
     <string name="home">Home</string>
     <string name="back">Back</string>
     <string name="icon">Icon</string>
+    <string name="image_viewer">Image Viewer</string>
+    <string name="close">Close</string>
 </resources>

@@ -14,7 +14,8 @@
         android:layout_height="wrap_content"
         android:gravity="center|start"
         android:orientation="horizontal"
-        android:baselineAligned="false">
+        android:baselineAligned="false"
+        tools:ignore="UselessParent">
 
         <RelativeLayout
             android:layout_width="36dp"

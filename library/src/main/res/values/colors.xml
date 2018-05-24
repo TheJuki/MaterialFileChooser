@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="criar_pasta_input_out_range">#fff44336</color>
+    <color name="create_folder_input_out_of_range">#fff44336</color>
 </resources>

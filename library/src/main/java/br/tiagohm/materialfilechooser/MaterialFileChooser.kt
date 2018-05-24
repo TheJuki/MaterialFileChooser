@@ -18,6 +18,7 @@ import br.tiagohm.breadcrumbview.BreadCrumbView
 import br.tiagohm.easyadapter.EasyAdapter
 import br.tiagohm.materialfilechooser.filters.Filter
 import com.afollestad.materialdialogs.MaterialDialog
+import com.bumptech.glide.Glide
 import java.io.File
 import java.io.FileFilter
 import java.util.*
@@ -145,17 +146,21 @@ open class MaterialFileChooser(val context: Context,
         // Checkbox is selected
         if (isSelected) {
             // It is not multi-selectable and has a selected file
-            if (!allowMultipleFiles && filePreviouslySelectedCb != null) {
-                val cb = filePreviouslySelectedCb!!
-                filePreviouslySelectedCb = null
-                // Two files are in the same folder
-                if (buttonView !== cb && file.parent == fileSelected?.parent) {
-                    // Uncheck what is selected
-                    cb.isChecked = false
+            if (!allowMultipleFiles) {
+                if (filePreviouslySelectedCb != null) {
+                    val cb = filePreviouslySelectedCb!!
+                    filePreviouslySelectedCb = null
+                    // Two files are in the same folder
+                    if (buttonView !== cb && file.parent == fileSelected?.parent) {
+                        // Uncheck what is selected
+                        cb.isChecked = false
+                    } else {
+                        // Removes what is selected
+                        fileSelected = null
+                    }
                 } else {
-                    // Removes what is selected
-                    filesSelected.remove(fileSelected)
-                    fileSelected = null
+                    filesSelected.clear()
+                    selectedFilesTotalSize = 0
                 }
             }
             // Add the file
@@ -349,10 +354,22 @@ open class MaterialFileChooser(val context: Context,
                     // Go to clicked folder
                     if (file.isFolder) {
                         goTo(file)
+                    } else if (file.isFile && file.isImage(context)) {
+                        val imageViewerDialog = MaterialDialog.Builder(context)
+                                .title(file.name)
+                                .titleColor(titleColorInt)
+                                .customView(R.layout.dialog_image, false)
+                                .negativeColor(cancelButtonColorInt)
+                                .negativeText(R.string.close)
+                                .backgroundColor(backgroundColorInt).build()
+
+                        val imageViewer: ImageView by lazy { imageViewerDialog.customView!!.findViewById<ImageView>(R.id.imageViewer) }
+                        Glide.with(context).load(file).into(imageViewer)
+                        imageViewerDialog.show()
                     } else {
-                        injector.using<CheckBox>(R.id.selectFileCheckBox) {
-                            selectFile(this, file, isChecked)
-                        }
+                        selectFile(null, file, !filesSelected.contains(file))
+                        // Reload the displayed items
+                        loadCurrentFolder()
                     }
                 }
                 // Select/un-select file
@@ -403,6 +420,7 @@ open class MaterialFileChooser(val context: Context,
             mSearchButton.setOnClickListener {
                 if (mSearchBoxFrame.visibility == View.VISIBLE) {
                     mSearchBoxFrame.visibility = View.GONE
+                    mSearchField.text.clear()
                 } else {
                     mSearchBoxFrame.visibility = View.VISIBLE
                 }
@@ -416,22 +434,22 @@ open class MaterialFileChooser(val context: Context,
                 MaterialDialog.Builder(context)
                         .title(R.string.create_folder_title)
                         .titleColor(titleColorInt)
-                        .inputRangeRes(1, -1, R.color.criar_pasta_input_out_range)
+                        .inputRangeRes(1, -1, R.color.create_folder_input_out_of_range)
                         .inputType(InputType.TYPE_CLASS_TEXT)
                         .negativeText(android.R.string.cancel)
                         .negativeColor(cancelButtonColorInt)
                         .positiveColor(okButtonColorInt)
                         .backgroundColor(backgroundColorInt)
                         .input(R.string.create_folder_name_hint, 0, false, { _, input ->
-                            val novaPasta = File(currentFolder, input.toString())
+                            val newFolder = File(currentFolder, input.toString())
                             try {
-                                if (!novaPasta.mkdir()) {
-                                    Toast.makeText(context, "error", Toast.LENGTH_SHORT).show()
+                                if (!newFolder.mkdir()) {
+                                    Toast.makeText(context, "Cannot create new folder. Do you have permission?", Toast.LENGTH_SHORT).show()
                                 } else {
                                     loadCurrentFolder()
                                 }
                             } catch (e: Exception) {
-                                Toast.makeText(context, "error: " + e.message, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Cannot create new folder: " + e.message, Toast.LENGTH_SHORT).show()
                             }
                         }).show()
             }
@@ -445,7 +463,10 @@ open class MaterialFileChooser(val context: Context,
                 
             }
             onNegative { dialog, _ ->
-                dialog.dismiss()
+                if (filesSelected.size in minSelectedFiles..maxSelectedFiles) {
+                    // Close dialog window
+                    dialog.dismiss()
+                }
             }
             dismissListener {
                 // Saves the current folder if it is allowed to restore folders.

@@ -1,9 +1,14 @@
 package br.tiagohm.materialfilechooser
 
+import android.content.ContentResolver
+import android.content.Context
+import android.net.Uri
+import android.webkit.MimeTypeMap
 import org.ocpsoft.prettytime.PrettyTime
 import java.io.File
 import java.io.FileFilter
 import java.util.*
+
 
 private object TimeFormatter : PrettyTime()
 
@@ -43,3 +48,18 @@ fun File.count(filter: FileFilter): Int = if (this.isFolder) this.listFiles(filt
         ?: 0 else 0
 
 val File.isProtected: Boolean get() = !this.canRead() || !this.canWrite()
+
+fun File.isImage(context: Context): Boolean = this.mimeType(context).startsWith("image")
+
+fun File.mimeType(context: Context): String {
+    val uri = Uri.fromFile(this)
+    return if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
+        val cr = context.contentResolver
+        cr.getType(uri)
+    } else {
+        val fileExtension: String? = MimeTypeMap.getFileExtensionFromUrl(uri
+                .toString())
+        MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                fileExtension?.toLowerCase()) ?: "Unknown"
+    }
+}
