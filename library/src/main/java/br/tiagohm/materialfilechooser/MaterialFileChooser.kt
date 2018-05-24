@@ -29,8 +29,8 @@ open class MaterialFileChooser(val context: Context,
                                val allowCreateFolder: Boolean = false,
                                var initialFolder: File = Environment.getExternalStorageDirectory(),
                                val allowSelectFolder: Boolean = false,
-                               val minSelectedFiles: Int = 0,
-                               val maxSelectedFiles: Int = Int.MAX_VALUE,
+                               var minSelectedFiles: Int = 0,
+                               var maxSelectedFiles: Int = Int.MAX_VALUE,
                                val showHiddenFiles: Boolean = false,
                                val showFoldersFirst: Boolean = true,
                                val showFiles: Boolean = true,
@@ -80,6 +80,14 @@ open class MaterialFileChooser(val context: Context,
     private var onSelectedFilesListener: (files: List<File>) -> Unit = {}
     
     init {
+        // Prevent maxSelectedFiles from being less than 0
+        if (minSelectedFiles < 0) {
+            minSelectedFiles = 0
+        }
+        // Prevent maxSelectedFiles from being less than 1
+        if (maxSelectedFiles <= 0) {
+            maxSelectedFiles = 1
+        }
         // Default home folder
         setHomeFolder(ChooserSharedPreference.getPreviouslySelectedDirectory(context, restoreFolder, initialFolder))
     }

@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
                 numbersOnly = true
                 value = fileChooserModel.maxSelectedFiles.toString()
                 valueObservers.add({ newValue, _ ->
-                    fileChooserModel.maxSelectedFiles = newValue?.toInt() ?: 0
+                    fileChooserModel.maxSelectedFiles = newValue?.toIntOrNull() ?: 0
                 })
             }
             checkBox<Boolean> {
